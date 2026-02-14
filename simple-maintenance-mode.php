@@ -55,7 +55,7 @@ function smm_user_can_bypass(): bool {
  * Pedidos que nunca são bloqueados (login, cron, admin, etc.).
  */
 function smm_should_allow_request(): bool {
-	// Área de administração
+	// Área de administração.
 	if (is_admin()) {
 		return true;
 	}
@@ -63,24 +63,24 @@ function smm_should_allow_request(): bool {
 	$script = $_SERVER['SCRIPT_NAME'] ?? '';
 	$uri    = $_SERVER['REQUEST_URI'] ?? '';
 
-	// Ficheiros críticos do core
+	// Ficheiros críticos do core.
 	if (strpos($script, 'wp-login.php') !== false) return true;
 	if (strpos($script, 'wp-cron.php')  !== false) return true;
 
-	// REST API – só com bypass ou permissão explícita
+	// REST API – só com bypass ou permissão explícita.
 	if (defined('REST_REQUEST') && REST_REQUEST) {
 		$allow = (bool) apply_filters('smm_allow_rest_request', false, $uri);
 		return smm_user_can_bypass() || $allow;
 	}
 
-	// AJAX – só com bypass ou permissão explícita
+	// AJAX – só com bypass ou permissão explícita.
 	if (defined('DOING_AJAX') && DOING_AJAX) {
 		$action = $_REQUEST['action'] ?? '';
 		$allow  = (bool) apply_filters('smm_allow_ajax_action', false, $action);
 		return smm_user_can_bypass() || $allow;
 	}
 
-	// Filtro genérico para outros casos (webhooks, healthchecks)
+	// Filtro genérico para outros casos (webhooks, healthchecks).
 	if (apply_filters('smm_allow_request', false, $uri)) {
 		return true;
 	}
