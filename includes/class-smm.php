@@ -294,8 +294,8 @@ class Smm {
 				return true;
 			}
 
-			$script = $_SERVER['SCRIPT_NAME'] ?? '';
-			$uri    = $_SERVER['REQUEST_URI'] ?? '';
+			$script = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
+			$uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
 			if ( strpos( $script, 'wp-login.php' ) !== false ) return true;
 			if ( strpos( $script, 'wp-cron.php' )  !== false ) return true;

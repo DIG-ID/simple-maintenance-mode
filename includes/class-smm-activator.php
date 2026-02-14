@@ -31,6 +31,32 @@ class Smm_Activator {
 	 */
 	public static function activate() {
 
+		// Check WordPress version.
+		global $wp_version;
+		if ( version_compare( $wp_version, '5.8', '<' ) ) {
+			deactivate_plugins( plugin_basename( __FILE__ ) );
+			wp_die( 
+				'Este plugin requer WordPress 5.8 ou superior.', 
+				'Plugin Activation Error', 
+				array( 'back_link' => true ) 
+			);
+		}
+
+		// Check PHP version.
+		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
+			deactivate_plugins( plugin_basename( __FILE__ ) );
+			wp_die( 
+				'Este plugin requer PHP 7.4 ou superior.', 
+				'Plugin Activation Error', 
+				array( 'back_link' => true ) 
+			);
+		}
+
+		// Set default option if doesn't exist.
+		if ( false === get_option( 'smm_enabled' ) ) {
+			add_option( 'smm_enabled', 0, '', 'no' );
+		}
+
 	}
 
 }

@@ -118,34 +118,39 @@ class Smm_Admin {
 	 * @param    WP_Admin_Bar    $wp_admin_bar    The admin bar object.
 	 */
 	public function add_admin_bar_menu( $wp_admin_bar ) {
-		// Apenas para utilizadores com bypass
+
+		// Apenas para utilizadores com bypass.
 		if ( ! $this->core->user_can_bypass() ) {
 			return;
 		}
 
 		$enabled = $this->core->is_enabled();
 		$title = $enabled
-			? '<span class="ab-icon dashicons dashicons-hammer"></span><span class="ab-label">Maintenance ON</span>'
-			: '<span class="ab-icon dashicons dashicons-yes-alt"></span><span class="ab-label">Maintenance OFF</span>';
+			? '<span class="ab-icon dashicons dashicons-hammer"></span><span class="ab-label">' . esc_html__( 'Maintenance ON', 'smm' ) . '</span>'
+			: '<span class="ab-icon dashicons dashicons-yes-alt"></span><span class="ab-label">' . esc_html__( 'Maintenance OFF', 'smm' ) . '</span>';
 
-		$wp_admin_bar->add_node( array(
-			'id'     => 'smm-maintenance',
-			'title'  => $title,
-			'href'   => $this->core->get_toggle_url(),
-			'meta'   => array(
-				'class' => $enabled ? 'smm-on' : 'smm-off',
-				'title' => $enabled ? 'Desativar modo manutenção' : 'Ativar modo manutenção',
-			),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'id'     => 'smm-maintenance',
+				'title'  => $title,
+				'href'   => $this->core->get_toggle_url(),
+				'meta'   => array(
+					'class' => $enabled ? 'smm-on' : 'smm-off',
+					'title' => $enabled ? esc_html__( 'Deactivate maintenance mode', 'smm' ) : esc_html__( 'Activate maintenance mode', 'smm' ),
+				),
+			)
+		);
 
-		// Adiciona submenu de preview
-		$wp_admin_bar->add_node( array(
+		// Adiciona submenu de preview.
+		$wp_admin_bar->add_node(
+			array(
 				'id'     => 'smm-preview',
 				'parent' => 'smm-maintenance',
-				'title'  => 'Ver Preview',
+				'title'  => esc_html__( 'View Preview', 'smm' ),
 				'href'   => home_url( '/?smm_preview=1' ),
 				'meta'   => array( 'target' => '_blank' ),
-		) );
+			)
+		);
 
 	}
 
@@ -155,6 +160,7 @@ class Smm_Admin {
 	 * @since    1.0.0
 	 */
 	public function admin_notice() {
+
 		if ( ! $this->core->is_enabled() || ! $this->core->user_can_bypass() ) {
 			return;
 		}
@@ -163,11 +169,13 @@ class Smm_Admin {
 		?>
 		<div class="notice notice-error">
 			<p>
-				<strong>Modo manutenção ATIVO.</strong> Visitantes estão a ver a página de manutenção.
-				<a href="<?php echo esc_url( $toggle_url ); ?>">Desativar agora</a>
+				<strong><?php esc_html_e( 'Maintenance mode ACTIVE.', 'smm' ); ?></strong> 
+				<?php esc_html_e( 'Visitors are seeing the maintenance page.', 'smm' ); ?>
+				<a href="<?php echo esc_url( $toggle_url ); ?>"><?php esc_html_e( 'Deactivate now', 'smm' ); ?></a>
 			</p>
 		</div>
 		<?php
+
 	}
 
 	/**
@@ -176,21 +184,24 @@ class Smm_Admin {
 	 * @since    1.0.0
 	 */
 	public function handle_toggle() {
-		// Verifica permissões
+
+		// Verifica permissões.
 		if ( ! is_user_logged_in() || ! $this->core->user_can_bypass() ) {
 			wp_die( 'Unauthorized.', 403 );
 		}
 
-		// Verifica o nonce
+		// Verifica o nonce.
 		check_admin_referer( Smm::NONCE_ACTION );
 
-		// Alterna o estado
+		// Alterna o estado.
 		$new_state = $this->core->is_enabled() ? 0 : 1;
+		$new_state = absint( $new_state ); // Force integer 0 or 1
 		update_option( Smm::OPTION_ENABLED, $new_state, false );
 
-		// Redireciona de volta
+		// Redireciona de volta.
 		wp_safe_redirect( wp_get_referer() ?: admin_url() );
 		exit;
+
 	}
 
 }

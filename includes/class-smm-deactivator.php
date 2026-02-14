@@ -31,6 +31,10 @@ class Smm_Deactivator {
 	 */
 	public static function deactivate() {
 
+		// Turn off maintenance mode when plugin is deactivated.
+		// This prevents the site from being locked if plugin is deactivated while active.
+		update_option( 'smm_enabled', 0, false );
+
 	}
 
 }
