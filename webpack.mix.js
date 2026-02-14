@@ -5,9 +5,10 @@ const tailwindcss = require('tailwindcss');
 
 mix
   .setResourceRoot('./')
-  .setPublicPath('dist')
 
-  .sass('assets/sass/main.sass', 'css')
+  .sass('admin/sass/smm-admin.sass', 'admin/css')
+  .sass('public/sass/smm-public.sass', 'public/css')
+  .sass('assets/sass/smm-common.sass', 'assets/css')
   .options({
     postCss: [ tailwindcss('./tailwind.config.js') ],
     processCssUrls: false,
@@ -19,7 +20,12 @@ mix
       ws: true,
     },
     https: true,
-    files: ["./**/*.php", "./dist/css/*.css"],
+    files: [
+      "./**/*.php", 
+      "./admin/css/*.css",
+      "./public/css/*.css",
+      "./assets/css/*.css"
+    ],
     injectChanges: true,
   })
   .disableNotifications();

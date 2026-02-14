@@ -535,10 +535,6 @@ video {
 .self-start {
   align-self: flex-start;
 }
-.bg-blue-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(96 165 250 / var(--tw-bg-opacity, 1));
-}
 .bg-blue-shade-1 {
   --tw-bg-opacity: 1;
   background-color: rgb(239 239 239 / var(--tw-bg-opacity, 1));
@@ -547,10 +543,6 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(33 35 49 / var(--tw-bg-opacity, 1));
 }
-.bg-slate-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(148 163 184 / var(--tw-bg-opacity, 1));
-}
 .bg-slate-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
@@ -558,21 +550,14 @@ video {
 .p-16 {
   padding: 4rem;
 }
-.p-32 {
-  padding: 8rem;
-}
 .p-3 {
   padding: 0.75rem;
 }
-.font-montserrat {
-  font-family: Montserrat, sans-serif;
+.p-32 {
+  padding: 8rem;
 }
 .font-sourcesanspro {
   font-family: Source Sans Pro, sans-serif;
-}
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
 }
 .text-4xl {
   font-size: 2.25rem;
@@ -585,9 +570,6 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-.font-bold {
-  font-weight: 700;
 }
 .font-light {
   font-weight: 300;
@@ -613,12 +595,18 @@ video {
   --tw-text-opacity: 1;
   color: rgb(241 245 249 / var(--tw-text-opacity, 1));
 }
-body {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 168 212 / var(--tw-bg-opacity, 1));
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --tw-text-opacity: 1;
-  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+#wpadminbar #wp-admin-bar-smm-maintenance.smm-on > .ab-item {
+  background: #b91c1c !important;
+  color: #fff !important;
 }
 
-/*# sourceMappingURL=main.css.map*/
+#wpadminbar #wp-admin-bar-smm-maintenance.smm-off > .ab-item {
+  background: #065f46 !important;
+  color: #fff !important;
+}
+
+#wpadminbar #wp-admin-bar-smm-maintenance .ab-icon {
+  margin-right: 4px;
+}
+
+/*# sourceMappingURL=smm-common.css.map*/
