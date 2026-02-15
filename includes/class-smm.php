@@ -89,6 +89,8 @@ class Smm {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->define_common_hooks();
+		$this->init_kirki_checker();
+		$this->init_customizer();
 
 	}
 
@@ -137,6 +139,16 @@ class Smm {
 		 * The class responsible for defining all actions that occur in the common area in both admin area and public-facing.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-common.php';
+
+		/**
+		 * Kirki dependency checker
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-kirki-checker.php';
+
+		/**
+		 * Customizer integration
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-customizer.php';
 
 		/**
 	 * The class responsible for utility functions.
@@ -212,11 +224,31 @@ class Smm {
 
 		$plugin_common = new Smm_Common( $this );
 
-    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_styles' );
-    $this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
-    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_styles' );
-    $this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_styles' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_styles' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
 
+	}
+
+	/**
+	 * Initialize Kirki checker
+	 *
+	 * @since 1.0.0
+	 * @access private
+	 */
+	private function init_kirki_checker() {
+		new Smm_Kirki_Checker();
+	}
+
+	/**
+	 * Initialize customizer
+	 *
+	 * @since 1.0.0
+	 * @access private
+	 */
+	private function init_customizer() {
+		new Smm_Customizer();
 	}
 
 	/**
@@ -290,32 +322,34 @@ class Smm {
 	 * @return bool
 	 */
 	public function should_allow_request() {
-			if ( is_admin() ) {
-				return true;
-			}
 
-			$script = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
-			$uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		if ( is_admin() ) {
+			return true;
+		}
 
-			if ( strpos( $script, 'wp-login.php' ) !== false ) return true;
-			if ( strpos( $script, 'wp-cron.php' )  !== false ) return true;
+		$script = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
+		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
-			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-				$allow = (bool) apply_filters( 'smm_allow_rest_request', false, $uri );
-				return $this->user_can_bypass() || $allow;
-			}
+		if ( strpos( $script, 'wp-login.php' ) !== false ) return true;
+		if ( strpos( $script, 'wp-cron.php' )  !== false ) return true;
 
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-				$action = $_REQUEST['action'] ?? '';
-				$allow  = (bool) apply_filters( 'smm_allow_ajax_action', false, $action );
-				return $this->user_can_bypass() || $allow;
-			}
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			$allow = (bool) apply_filters( 'smm_allow_rest_request', false, $uri );
+			return $this->user_can_bypass() || $allow;
+		}
 
-			if ( apply_filters( 'smm_allow_request', false, $uri ) ) {
-				return true;
-			}
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			$action = $_REQUEST['action'] ?? '';
+			$allow  = (bool) apply_filters( 'smm_allow_ajax_action', false, $action );
+			return $this->user_can_bypass() || $allow;
+		}
 
-			return false;
+		if ( apply_filters( 'smm_allow_request', false, $uri ) ) {
+			return true;
+		}
+
+		return false;
+
 	}
 
 	/**
@@ -325,10 +359,12 @@ class Smm {
 	 * @return string
 	 */
 	public function get_toggle_url() {
+
 		return wp_nonce_url(
 			admin_url( 'admin-post.php?action=smm_toggle' ),
 			self::NONCE_ACTION
 		);
+
 	}
 
 	/**
@@ -338,11 +374,13 @@ class Smm {
 	 * @return string
 	 */
 	public function get_maintenance_template() {
+
 		$template = locate_template( 'simple-maintenance-mode/maintenance.php' );
 		if ( ! empty( $template ) ) {
 			return $template;
 		}
 		return SMM_DIR . 'public/partials/smm-public-display.php';
+
 	}
 
 }

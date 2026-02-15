@@ -1,9 +1,5 @@
 {
-    "/mix.js.map": "/mix.js.map",
-    "/assets/css/smm-common.css": "/assets/css/smm-common.css",
-    "/assets/css/smm-common.css.map": "/assets/css/smm-common.css.map",
-    "/public/css/smm-public.css": "/public/css/smm-public.css",
-    "/public/css/smm-public.css.map": "/public/css/smm-public.css.map",
-    "/admin/css/smm-admin.css": "/admin/css/smm-admin.css",
-    "/admin/css/smm-admin.css.map": "/admin/css/smm-admin.css.map"
+    "/assets/css/smm-common.css": "/assets/css/smm-common.css?id=8c8b92a77ffe0ec8fe4f84e644047e45",
+    "/public/css/smm-public.css": "/public/css/smm-public.css?id=68b329da9893e34099c7d8ad5cb9c940",
+    "/admin/css/smm-admin.css": "/admin/css/smm-admin.css?id=68b329da9893e34099c7d8ad5cb9c940"
 }

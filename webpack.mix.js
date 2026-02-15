@@ -4,6 +4,7 @@ const mix = require('laravel-mix');
 const tailwindcss = require('tailwindcss');
 
 mix
+  .setPublicPath('./')
   .setResourceRoot('./')
 
   .sass('admin/sass/smm-admin.sass', 'admin/css')
@@ -21,7 +22,7 @@ mix
     },
     https: true,
     files: [
-      "./**/*.php", 
+      "./**/*.php",
       "./admin/css/*.css",
       "./public/css/*.css",
       "./assets/css/*.css"

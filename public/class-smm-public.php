@@ -117,67 +117,141 @@ class Smm_Public {
 	 * - User bypass capabilities
 	 * - Request exceptions (login, cron, etc.)
 	 * - Preview mode (?smm_preview=1)
+	 * - Customizer preview (is_customize_preview) - ONLY if maintenance is ON
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function template_redirect() {
-		// Verifica se é preview (apenas para admins).
-		$is_preview = isset( $_GET['smm_preview'] ) && $_GET['smm_preview'] === '1' && current_user_can( 'manage_options' );
-		$is_active  = $this->core->is_enabled();
 
-		// Se não está ativo e não é preview, sai.
-		if ( ! $is_active && ! $is_preview ) {
+		// Check if we're in Customizer preview.
+		$is_customizer_preview = is_customize_preview();
+
+		// Check if manual preview mode is active.
+		$is_manual_preview = $this->is_manual_preview();
+
+		// Check if maintenance mode is active.
+		$is_active = $this->core->is_enabled();
+
+		// If not active and not in manual preview mode, exit early.
+		if ( ! $is_active && ! $is_manual_preview ) {
 			return;
 		}
 
-		// Se está ativo e não é preview, verifica bypass e exceções.
-		if ( $is_active && ! $is_preview ) {
+		// If in Customizer preview AND maintenance is ON, show template.
+		if ( $is_customizer_preview && $is_active ) {
+			$this->show_maintenance_template( true );
+			return;
+		}
+
+		// If manual preview mode (for admins only).
+		if ( $is_manual_preview ) {
+			$this->show_maintenance_template( true );
+			return;
+		}
+
+		// If maintenance is active, check bypass and exceptions.
+		if ( $is_active ) {
 			if ( $this->core->user_can_bypass() || $this->core->should_allow_request() ) {
 				return;
 			}
+
+			// Show maintenance template (not preview).
+			$this->show_maintenance_template( false );
+		}
+	}
+
+
+	/**
+	 * Check if manual preview mode is active.
+	 *
+	 * Manual preview mode allows admins to preview the maintenance page
+	 * using the ?smm_preview=1 parameter.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @return bool True if manual preview is active, false otherwise.
+	 */
+	private function is_manual_preview() {
+		// Check for preview parameter.
+		if ( ! isset( $_GET['smm_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
 		}
 
-		// Se chegou aqui, mostra o template de manutenção.
-		$this->show_maintenance_template();
+		// Verify value is '1'.
+		if ( '1' !== $_GET['smm_preview'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return false;
+		}
+
+		// Only allow for users with manage_options capability.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
-	 * Includes the maintenance template and sends proper HTTP headers.
+	 * Include the maintenance template and send proper HTTP headers.
 	 *
-	 * @since    1.0.0
+	 * @since  1.0.0
+	 * @access private
+	 * @param  bool $is_preview Whether this is a preview (don't send 503 headers).
 	 */
-	private function show_maintenance_template() {
-		// Define headers para 503 (apenas se não for preview).
-		$is_preview = isset( $_GET['smm_preview'] ) && $_GET['smm_preview'] === '1';
+	private function show_maintenance_template( $is_preview = false ) {
+
+		// Only set 503 headers if NOT in preview mode.
 		if ( ! $is_preview ) {
 			status_header( 503 );
 			header( 'Retry-After: 600' );
 			header( 'X-Robots-Tag: noindex, nofollow', true );
 			nocache_headers();
 
-			if ( ! defined( 'DONOTCACHEPAGE' ) )   define( 'DONOTCACHEPAGE', true );
-			if ( ! defined( 'DONOTCACHEOBJECT' ) ) define( 'DONOTCACHEOBJECT', true );
-			if ( ! defined( 'DONOTMINIFY' ) )      define( 'DONOTMINIFY', true );
+			if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+				define( 'DONOTCACHEPAGE', true );
+			}
+			if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+				define( 'DONOTCACHEOBJECT', true );
+			}
+			if ( ! defined( 'DONOTMINIFY' ) ) {
+				define( 'DONOTMINIFY', true );
+			}
 		}
 
-		// Obtém o caminho do template (core decide: tema ou plugin).
+		// Get template path (theme override or plugin default).
 		$template = $this->core->get_maintenance_template();
 		$template = apply_filters( 'smm_maintenance_template', $template );
 
 		if ( ! is_readable( $template ) ) {
-			wp_die( 'Maintenance template not found.', 'Maintenance', array( 'response' => 503 ) );
+			wp_die(
+				esc_html__( 'Maintenance template not found.', 'smm' ),
+				esc_html__( 'Maintenance', 'smm' ),
+				array( 'response' => 503 )
+			);
 		}
 
 		// Disponibiliza variáveis úteis para o template.
 		$smm_vars = array(
-			'site_name'  => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
-			'home_url'   => home_url( '/' ),
-			'login_url'  => wp_login_url(),
-			'is_preview' => $is_preview,
+			'site_name'             => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+			'home_url'              => home_url( '/' ),
+			'login_url'             => wp_login_url(),
+			'is_preview'            => $is_preview,
+			'is_customizer'         => is_customize_preview(),
+			'is_maintenance_active' => $this->core->is_enabled(),
 		);
 		set_query_var( 'smm_vars', $smm_vars );
 
-		// Inclui o template.
+		/**
+		 * Filter maintenance template variables.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $smm_vars Template variables.
+		 */
+		$smm_vars = apply_filters( 'smm_template_vars', $smm_vars );
+
+		set_query_var( 'smm_vars', $smm_vars );
+
+		// Include the template.
 		include $template;
 		exit;
 	}
