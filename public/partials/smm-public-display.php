@@ -44,21 +44,21 @@
 						<?php
 					endif;
 					?>
-					<h1 class="font-montserrat font-bold tracking-tight uppercase text-4xl italic"><?php echo esc_html( smm_get_content( 'title', 'Em Manutenção' ) ); ?></h1>
-					<p class="text-lg"><?php echo wp_kses_post( smm_get_content( 'description', 'Estaremos de volta brevemente, pedimos desculpa pelo o transtorno causado. Agradecemos a tua compreensão e paciência.' ) ); ?></p>
+					<h1 class="font-montserrat font-bold tracking-tight uppercase !text-4xl italic"><?php echo esc_html( smm_get_content( 'title', 'Em Manutenção' ) ); ?></h1>
+					<p class="!text-lg"><?php echo wp_kses_post( smm_get_content( 'description', 'Estaremos de volta brevemente, pedimos desculpa pelo o transtorno causado. Agradecemos a tua compreensão e paciência.' ) ); ?></p>
 				</div>
 				<?php if ( get_query_var('smm_vars')['is_preview'] ) : ?>
-					<p class="text-xs font-sourcesanspro bg-slate-800 text-slate-100 p-3 mt-8 inline-block self-start"><em>Pré‑visualização do modo manutenção.</em></p>
+					<p class="!text-xs font-sourcesanspro bg-slate-800 text-slate-100 p-3 mt-8 inline-block self-start"><em>Pré‑visualização do modo manutenção.</em></p>
 				<?php endif; ?>
 			</div>
 
 			<aside class="right bg-blue-shade-3 text-blue-shade-1 w-full md:w-1/3 flex flex-col justify-center p-16 font-sourcesanspro text-base gap-8">
 				<div class="address">
-					<p class="text-base"><?php echo nl2br( smm_get_content( 'address', 'addresss' ) ); ?></p>
+					<p class="!text-base"><?php echo nl2br( smm_get_content( 'address', 'addresss' ) ); ?></p>
 				</div>
 				<div class="phone-and-email flex flex-col gap-2">
-					<a class="text-base" href="mailto:<?php echo esc_html( smm_get_content( 'email', 'email' ) ); ?>"><?php echo esc_html( smm_get_content( 'email', 'email' ) ); ?></a>
-					<a class="text-base" href="tel:<?php echo esc_html( smm_get_content( 'phone', 'phone' ) ); ?>"><?php echo esc_html( smm_get_content( 'phone', 'phone' ) ); ?></a>
+					<a class="!text-base" href="mailto:<?php echo esc_html( smm_get_content( 'email', 'email' ) ); ?>"><?php echo esc_html( smm_get_content( 'email', 'email' ) ); ?></a>
+					<a class="!text-base" href="tel:<?php echo esc_html( smm_get_content( 'phone', 'phone' ) ); ?>"><?php echo esc_html( smm_get_content( 'phone', 'phone' ) ); ?></a>
 				</div>
 				<div class="socials flex gap-4">
 					<?php
