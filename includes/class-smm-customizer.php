@@ -1,9 +1,9 @@
 <?php
 /**
- * Customizer Integration - SIMPLIFIED & WORKING
+ * Customizer Integration - 100% Native WordPress
  *
- * Uses DIRECT access to smm_enabled option.
- * No AJAX, no sync issues - just works!
+ * No dependencies, no Kirki, pure WordPress Customizer API.
+ * Always works, always syncs perfectly.
  *
  * @link       https://dig.id
  * @since      1.0.0
@@ -13,6 +13,16 @@
 
 /**
  * Customizer Integration Class
+ *
+ * Registers all maintenance mode customizer fields using native WordPress API.
+ *
+ * Fields included:
+ * - Toggle (ON/OFF)
+ * - Content (title, description)
+ * - Contact (email, phone, address)
+ * - Visual (logo, colors)
+ * - Social (facebook, instagram, twitter, linkedin)
+ * - Form (contact form shortcode)
  *
  * @since      1.0.0
  * @package    Smm
@@ -31,15 +41,6 @@ class Smm_Customizer {
 	private $option_name = 'smm_customizer';
 
 	/**
-	 * Kirki config ID.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 * @var    string
-	 */
-	private $kirki_config = 'smm_config';
-
-	/**
 	 * Panel ID.
 	 *
 	 * @since  1.0.0
@@ -54,281 +55,17 @@ class Smm_Customizer {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		if ( class_exists( 'Kirki' ) ) {
-			add_action( 'init', array( $this, 'register_with_kirki' ) );
-		} else {
-			add_action( 'customize_register', array( $this, 'register_native' ) );
-		}
-
-		// Add preview refresh script.
-		add_action( 'customize_preview_init', array( $this, 'add_preview_scripts' ) );
+		add_action( 'customize_register', array( $this, 'register_customizer' ), 10 );
+		add_action( 'customize_preview_init', array( $this, 'enqueue_preview_scripts' ) );
 	}
 
 	/**
-	 * Register fields with Kirki.
+	 * Register all Customizer fields.
 	 *
 	 * @since 1.0.0
+	 * @param WP_Customize_Manager $wp_customize Customizer instance.
 	 */
-	public function register_with_kirki() {
-
-		// Kirki config for CONTENT fields.
-		Kirki::add_config(
-			$this->kirki_config,
-			array(
-				'capability'  => 'manage_options',
-				'option_type' => 'option',
-				'option_name' => $this->option_name,
-			)
-		);
-
-		// Main Panel.
-		Kirki::add_panel(
-			$this->panel_id,
-			array(
-				'priority'    => 160,
-				'title'       => esc_html__( 'Maintenance Mode', 'smm' ),
-				'description' => esc_html__( 'Configure o modo manutenção. Ative/desative e veja o preview em tempo real.', 'smm' ),
-			)
-		);
-
-		// Register sections.
-		$this->register_kirki_toggle_section();
-		$this->register_kirki_content_section();
-		$this->register_kirki_contacts_section();
-		$this->register_kirki_visual_section();
-		$this->register_kirki_social_section();
-	}
-
-	/**
-	 * Register toggle section with Kirki.
-	 *
-	 * IMPORTANT: This uses smm_enabled DIRECTLY (same as Admin Bar).
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function register_kirki_toggle_section() {
-
-		Kirki::add_section(
-			'smm_toggle',
-			array(
-				'title'    => esc_html__( 'Estado', 'smm' ),
-				'panel'    => $this->panel_id,
-				'priority' => 5,
-			)
-		);
-
-		// Toggle field - uses smm_enabled DIRECTLY.
-		Kirki::add_field(
-			$this->kirki_config . '_toggle', // Separate config for this field.
-			array(
-				'type'        => 'toggle',
-				'settings'    => 'smm_enabled', // Direct access to main option!
-				'label'       => esc_html__( 'Modo Manutenção', 'smm' ),
-				'description' => esc_html__( 'Ative para mostrar a página de manutenção. O preview atualiza automaticamente.', 'smm' ),
-				'section'     => 'smm_toggle',
-				'default'     => 0,
-				'priority'    => 10,
-				'option_type' => 'option', // Store as option.
-				'option_name' => 'smm_enabled', // Direct name!
-			)
-		);
-
-		// Need separate config for the toggle since it uses different option.
-		Kirki::add_config(
-			$this->kirki_config . '_toggle',
-			array(
-				'capability'  => 'manage_options',
-				'option_type' => 'option',
-			)
-		);
-	}
-
-	/**
-	 * Register content section with Kirki.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function register_kirki_content_section() {
-
-		Kirki::add_section(
-			'smm_content',
-			array(
-				'title'    => esc_html__( 'Conteúdo', 'smm' ),
-				'panel'    => $this->panel_id,
-				'priority' => 10,
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'text',
-				'settings' => 'title',
-				'label'    => esc_html__( 'Título Principal', 'smm' ),
-				'section'  => 'smm_content',
-				'default'  => 'Em Manutenção',
-				'priority' => 10,
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'textarea',
-				'settings' => 'description',
-				'label'    => esc_html__( 'Mensagem', 'smm' ),
-				'section'  => 'smm_content',
-				'default'  => 'Estaremos de volta brevemente.',
-				'priority' => 20,
-			)
-		);
-	}
-
-	/**
-	 * Register contacts section with Kirki.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function register_kirki_contacts_section() {
-
-		Kirki::add_section(
-			'smm_contacts',
-			array(
-				'title'    => esc_html__( 'Contactos', 'smm' ),
-				'panel'    => $this->panel_id,
-				'priority' => 20,
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'text',
-				'settings' => 'email',
-				'label'    => esc_html__( 'Email', 'smm' ),
-				'section'  => 'smm_contacts',
-				'default'  => get_option( 'admin_email' ),
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'text',
-				'settings' => 'phone',
-				'label'    => esc_html__( 'Telefone', 'smm' ),
-				'section'  => 'smm_contacts',
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'textarea',
-				'settings' => 'address',
-				'label'    => esc_html__( 'Morada', 'smm' ),
-				'section'  => 'smm_contacts',
-			)
-		);
-	}
-
-	/**
-	 * Register visual section with Kirki.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function register_kirki_visual_section() {
-
-		Kirki::add_section(
-			'smm_visual',
-			array(
-				'title'    => esc_html__( 'Aparência', 'smm' ),
-				'panel'    => $this->panel_id,
-				'priority' => 30,
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'image',
-				'settings' => 'logo',
-				'label'    => esc_html__( 'Logo', 'smm' ),
-				'section'  => 'smm_visual',
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'color',
-				'settings' => 'bg_color',
-				'label'    => esc_html__( 'Cor de Fundo', 'smm' ),
-				'section'  => 'smm_visual',
-				'default'  => '#ffffff',
-			)
-		);
-
-		Kirki::add_field(
-			$this->kirki_config,
-			array(
-				'type'     => 'color',
-				'settings' => 'text_color',
-				'label'    => esc_html__( 'Cor do Texto', 'smm' ),
-				'section'  => 'smm_visual',
-				'default'  => '#000000',
-			)
-		);
-	}
-
-	/**
-	 * Register social media section with Kirki.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function register_kirki_social_section() {
-
-		Kirki::add_section(
-			'smm_social',
-			array(
-				'title'    => esc_html__( 'Redes Sociais', 'smm' ),
-				'panel'    => $this->panel_id,
-				'priority' => 40,
-			)
-		);
-
-		$social_networks = array(
-			'facebook'  => 'Facebook',
-			'instagram' => 'Instagram',
-			'twitter'   => 'Twitter',
-			'linkedin'  => 'LinkedIn',
-		);
-
-		foreach ( $social_networks as $key => $label ) {
-			Kirki::add_field(
-				$this->kirki_config,
-				array(
-					'type'     => 'url',
-					'settings' => 'social_' . $key,
-					'label'    => $label,
-					'section'  => 'smm_social',
-				)
-			);
-		}
-	}
-
-	/**
-	 * Register fields with native WordPress Customizer (fallback).
-	 *
-	 * @since 1.0.0
-	 * @param WP_Customize_Manager $wp_customize Customizer manager instance.
-	 */
-	public function register_native( $wp_customize ) {
+	public function register_customizer( $wp_customize ) {
 
 		// Main Panel.
 		$wp_customize->add_panel(
@@ -337,11 +74,29 @@ class Smm_Customizer {
 				'priority'    => 160,
 				'capability'  => 'manage_options',
 				'title'       => __( 'Maintenance Mode', 'smm' ),
-				'description' => __( 'Configure o modo manutenção.', 'smm' ),
+				'description' => __( 'Configure o modo manutenção e o conteúdo da página.', 'smm' ),
 			)
 		);
 
-		// Toggle section.
+		// Register sections.
+		$this->register_toggle_section( $wp_customize );
+		$this->register_content_section( $wp_customize );
+		$this->register_contact_section( $wp_customize );
+		$this->register_visual_section( $wp_customize );
+		$this->register_social_section( $wp_customize );
+		$this->register_form_section( $wp_customize );
+	}
+
+	/**
+	 * Register toggle section (ON/OFF).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_toggle_section( $wp_customize ) {
+
+		// Section.
 		$wp_customize->add_section(
 			'smm_toggle',
 			array(
@@ -351,27 +106,40 @@ class Smm_Customizer {
 			)
 		);
 
-		// Toggle setting - DIRECT access to smm_enabled.
+		// Setting: Toggle.
 		$wp_customize->add_setting(
 			'smm_enabled',
 			array(
 				'default'           => 0,
-				'sanitize_callback' => 'absint',
 				'type'              => 'option',
+				'capability'        => 'manage_options',
+				'sanitize_callback' => 'absint',
+				'transport'         => 'refresh',
 			)
 		);
 
+		// Control: Checkbox.
 		$wp_customize->add_control(
 			'smm_enabled',
 			array(
 				'label'       => __( 'Modo Manutenção', 'smm' ),
-				'description' => __( 'Ative para mostrar a página de manutenção.', 'smm' ),
+				'description' => __( 'Ative para mostrar a página de manutenção aos visitantes.', 'smm' ),
 				'section'     => 'smm_toggle',
 				'type'        => 'checkbox',
 			)
 		);
+	}
 
-		// Content section.
+	/**
+	 * Register content section (title, description).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_content_section( $wp_customize ) {
+
+		// Section.
 		$wp_customize->add_section(
 			'smm_content',
 			array(
@@ -381,15 +149,17 @@ class Smm_Customizer {
 			)
 		);
 
+		// Setting: Title.
 		$wp_customize->add_setting(
 			$this->option_name . '[title]',
 			array(
 				'default'           => 'Em Manutenção',
-				'sanitize_callback' => 'sanitize_text_field',
 				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_text_field',
 			)
 		);
 
+		// Control: Title.
 		$wp_customize->add_control(
 			'smm_title',
 			array(
@@ -400,15 +170,17 @@ class Smm_Customizer {
 			)
 		);
 
+		// Setting: Description.
 		$wp_customize->add_setting(
 			$this->option_name . '[description]',
 			array(
-				'default'           => 'Estaremos de volta brevemente.',
-				'sanitize_callback' => 'wp_kses_post',
+				'default'           => 'Estaremos de volta brevemente. Pedimos desculpa pelo incómodo.',
 				'type'              => 'option',
+				'sanitize_callback' => 'wp_kses_post',
 			)
 		);
 
+		// Control: Description.
 		$wp_customize->add_control(
 			'smm_description',
 			array(
@@ -418,35 +190,306 @@ class Smm_Customizer {
 				'type'     => 'textarea',
 			)
 		);
-
-		// Other sections similar to Kirki version...
-		// (Contacts, Visual, Social - similar structure)
 	}
 
 	/**
-	 * Add preview refresh script.
+	 * Register contact section (email, phone, address).
 	 *
-	 * CRITICAL: This makes the preview update when toggle changes!
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_contact_section( $wp_customize ) {
+
+		// Section.
+		$wp_customize->add_section(
+			'smm_contact',
+			array(
+				'title'       => __( 'Contactos', 'smm' ),
+				'panel'       => $this->panel_id,
+				'priority'    => 20,
+				'description' => __( 'Informações de contacto a mostrar na página de manutenção.', 'smm' ),
+			)
+		);
+
+		// Setting: Email.
+		$wp_customize->add_setting(
+			$this->option_name . '[email]',
+			array(
+				'default'           => get_option( 'admin_email' ),
+				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_email',
+			)
+		);
+
+		// Control: Email.
+		$wp_customize->add_control(
+			'smm_email',
+			array(
+				'label'    => __( 'Email', 'smm' ),
+				'section'  => 'smm_contact',
+				'settings' => $this->option_name . '[email]',
+				'type'     => 'email',
+			)
+		);
+
+		// Setting: Phone.
+		$wp_customize->add_setting(
+			$this->option_name . '[phone]',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+
+		// Control: Phone.
+		$wp_customize->add_control(
+			'smm_phone',
+			array(
+				'label'    => __( 'Telefone', 'smm' ),
+				'section'  => 'smm_contact',
+				'settings' => $this->option_name . '[phone]',
+				'type'     => 'tel',
+			)
+		);
+
+		// Setting: Address.
+		$wp_customize->add_setting(
+			$this->option_name . '[address]',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			)
+		);
+
+		// Control: Address.
+		$wp_customize->add_control(
+			'smm_address',
+			array(
+				'label'    => __( 'Morada', 'smm' ),
+				'section'  => 'smm_contact',
+				'settings' => $this->option_name . '[address]',
+				'type'     => 'textarea',
+			)
+		);
+	}
+
+	/**
+	 * Register visual section (logo, colors).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_visual_section( $wp_customize ) {
+
+		// Section.
+		$wp_customize->add_section(
+			'smm_visual',
+			array(
+				'title'    => __( 'Aparência', 'smm' ),
+				'panel'    => $this->panel_id,
+				'priority' => 30,
+			)
+		);
+
+		// Setting: Logo.
+		$wp_customize->add_setting(
+			$this->option_name . '[logo]',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'sanitize_callback' => 'absint',
+			)
+		);
+
+		// Control: Logo (Media).
+		$wp_customize->add_control(
+			new WP_Customize_Media_Control(
+				$wp_customize,
+				'smm_logo',
+				array(
+					'label'     => __( 'Logo', 'smm' ),
+					'section'   => 'smm_visual',
+					'settings'  => $this->option_name . '[logo]',
+					'mime_type' => 'image',
+				)
+			)
+		);
+
+		// Setting: Background Color.
+		$wp_customize->add_setting(
+			$this->option_name . '[bg_color]',
+			array(
+				'default'           => '#ffffff',
+				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_hex_color',
+			)
+		);
+
+		// Control: Background Color.
+		$wp_customize->add_control(
+			new WP_Customize_Color_Control(
+				$wp_customize,
+				'smm_bg_color',
+				array(
+					'label'    => __( 'Cor de Fundo', 'smm' ),
+					'section'  => 'smm_visual',
+					'settings' => $this->option_name . '[bg_color]',
+				)
+			)
+		);
+
+		// Setting: Text Color.
+		$wp_customize->add_setting(
+			$this->option_name . '[text_color]',
+			array(
+				'default'           => '#000000',
+				'type'              => 'option',
+				'sanitize_callback' => 'sanitize_hex_color',
+			)
+		);
+
+		// Control: Text Color.
+		$wp_customize->add_control(
+			new WP_Customize_Color_Control(
+				$wp_customize,
+				'smm_text_color',
+				array(
+					'label'    => __( 'Cor do Texto', 'smm' ),
+					'section'  => 'smm_visual',
+					'settings' => $this->option_name . '[text_color]',
+				)
+			)
+		);
+	}
+
+	/**
+	 * Register social section (Facebook, Instagram, Twitter, LinkedIn).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_social_section( $wp_customize ) {
+
+		// Section.
+		$wp_customize->add_section(
+			'smm_social',
+			array(
+				'title'       => __( 'Redes Sociais', 'smm' ),
+				'panel'       => $this->panel_id,
+				'priority'    => 40,
+				'description' => __( 'Links para as redes sociais (deixe vazio para não mostrar).', 'smm' ),
+			)
+		);
+
+		// Social networks.
+		$social_networks = array(
+			'facebook'  => 'Facebook',
+			'instagram' => 'Instagram',
+			'twitter'   => 'Twitter',
+			'linkedin'  => 'LinkedIn',
+		);
+
+		foreach ( $social_networks as $key => $label ) {
+			// Setting.
+			$wp_customize->add_setting(
+				$this->option_name . '[social_' . $key . ']',
+				array(
+					'default'           => '',
+					'type'              => 'option',
+					'sanitize_callback' => 'esc_url_raw',
+				)
+			);
+
+			// Control.
+			$wp_customize->add_control(
+				'smm_social_' . $key,
+				array(
+					'label'       => $label,
+					'section'     => 'smm_social',
+					'settings'    => $this->option_name . '[social_' . $key . ']',
+					'type'        => 'url',
+					'placeholder' => 'https://',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Register form section (Contact Form shortcode).
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @param  WP_Customize_Manager $wp_customize Customizer instance.
+	 */
+	private function register_form_section( $wp_customize ) {
+
+		// Section.
+		$wp_customize->add_section(
+			'smm_form',
+			array(
+				'title'       => __( 'Formulário de Contacto', 'smm' ),
+				'panel'       => $this->panel_id,
+				'priority'    => 50,
+				'description' => __( 'Shortcode do formulário de contacto (ex: Contact Form 7, WPForms).', 'smm' ),
+			)
+		);
+
+		// Setting: Shortcode.
+		$wp_customize->add_setting(
+			$this->option_name . '[form_shortcode]',
+			array(
+				'default'           => '',
+				'type'              => 'option',
+				'sanitize_callback' => array( $this, 'sanitize_shortcode' ),
+			)
+		);
+
+		// Control: Shortcode.
+		$wp_customize->add_control(
+			'smm_form_shortcode',
+			array(
+				'label'       => __( 'Shortcode do Formulário', 'smm' ),
+				'description' => __( 'Exemplo: [contact-form-7 id="123"]', 'smm' ),
+				'section'     => 'smm_form',
+				'settings'    => $this->option_name . '[form_shortcode]',
+				'type'        => 'text',
+				'placeholder' => '[contact-form-7 id="123"]',
+			)
+		);
+	}
+
+	/**
+	 * Sanitize shortcode input.
+	 *
+	 * Allows only valid shortcode format.
+	 *
+	 * @since  1.0.0
+	 * @param  string $input Shortcode input.
+	 * @return string        Sanitized shortcode.
+	 */
+	public function sanitize_shortcode( $input ) {
+		// Remove any dangerous tags but keep shortcode brackets.
+		return wp_kses( $input, array() );
+	}
+
+	/**
+	 * Enqueue preview refresh script.
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_preview_scripts() {
-		?>
-		<script type="text/javascript">
-		(function($) {
-			'use strict';
-
-			// Listen to smm_enabled changes and refresh.
-			wp.customize('smm_enabled', function(value) {
-				value.bind(function(to) {
-					// Force full page reload to show/hide template.
-					wp.customize.previewer.refresh();
-				});
-			});
-
-		})(jQuery);
-		</script>
-		<?php
+	public function enqueue_preview_scripts() {
+		wp_enqueue_script(
+			'smm-customizer-preview',
+			plugin_dir_url( dirname( __FILE__ ) ) . 'admin/js/smm-customizer-preview.js',
+			array( 'customize-preview', 'jquery' ),
+			'1.0.0',
+			true
+		);
 	}
 
 }

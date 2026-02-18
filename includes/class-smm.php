@@ -89,7 +89,6 @@ class Smm {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->define_common_hooks();
-		$this->init_kirki_checker();
 		$this->init_customizer();
 
 	}
@@ -139,11 +138,6 @@ class Smm {
 		 * The class responsible for defining all actions that occur in the common area in both admin area and public-facing.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-common.php';
-
-		/**
-		 * Kirki dependency checker
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-kirki-checker.php';
 
 		/**
 		 * Customizer integration
@@ -229,16 +223,6 @@ class Smm {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
 
-	}
-
-	/**
-	 * Initialize Kirki checker
-	 *
-	 * @since 1.0.0
-	 * @access private
-	 */
-	private function init_kirki_checker() {
-		new Smm_Kirki_Checker();
 	}
 
 	/**

@@ -3,7 +3,9 @@
  * Utility Functions
  *
  * Helper functions for retrieving content from Customizer.
- * Priority order: Customizer > Filters > Defaults
+ * 100% Native WordPress - No Kirki, no ACF.
+ *
+ * Priority: Customizer > Filters > Defaults
  *
  * @link       https://dig.id
  * @since      1.0.0
@@ -17,10 +19,7 @@
  *
  * Contains static helper methods for content retrieval.
  *
- * The get_content() method checks sources in priority order:
- * 1. WordPress Customizer (if configured)
- * 2. Filter hooks (for programmatic override)
- * 3. Default values (fallback)
+ * All methods read from the 'smm_customizer' option array.
  *
  * @since      1.0.0
  * @package    Smm
@@ -34,15 +33,15 @@ class Smm_Utils {
 	 *
 	 * @since  1.0.0
 	 * @access private
-	 * @var    string    $option_name    Database option name.
+	 * @var    string
 	 */
 	private static $option_name = 'smm_customizer';
 
 	/**
-	 * Get content from Customizer or default.
+	 * Get content from Customizer.
 	 *
-	 * Checks in priority order:
-	 * 1. Customizer (Kirki or native)
+	 * Priority order:
+	 * 1. Customizer value
 	 * 2. Filter hook
 	 * 3. Default value
 	 *
@@ -53,20 +52,18 @@ class Smm_Utils {
 	 */
 	public static function get_content( $key, $default = '' ) {
 
-		// Try Customizer first.
+		// Try Customizer.
 		$customizer_value = self::get_from_customizer( $key );
 		if ( ! empty( $customizer_value ) ) {
 			return $customizer_value;
 		}
 
-		// Fallback to filter (allows themes/plugins to override).
+		// Fallback to filter.
 		return (string) apply_filters( 'smm_content_' . $key, $default );
 	}
 
 	/**
 	 * Get value from Customizer.
-	 *
-	 * Retrieves value from WordPress Customizer options.
 	 *
 	 * @since  1.0.0
 	 * @access private
@@ -74,11 +71,9 @@ class Smm_Utils {
 	 * @return string|null Content value or null if not found.
 	 */
 	private static function get_from_customizer( $key ) {
-
-		// Get all customizer options.
 		$options = get_option( self::$option_name, array() );
 
-		if ( isset( $options[ $key ] ) && ! empty( $options[ $key ] ) ) {
+		if ( isset( $options[ $key ] ) && '' !== $options[ $key ] ) {
 			return $options[ $key ];
 		}
 
@@ -88,7 +83,7 @@ class Smm_Utils {
 	/**
 	 * Get image URL from Customizer.
 	 *
-	 * Handles image fields that store attachment IDs.
+	 * The logo field stores an attachment ID.
 	 *
 	 * @since  1.0.0
 	 * @param  string $key     The image key (e.g., 'logo').
@@ -98,8 +93,8 @@ class Smm_Utils {
 	 */
 	public static function get_image( $key, $size = 'full', $default = '' ) {
 
-		// Try Customizer (stores attachment ID).
 		$options = get_option( self::$option_name, array() );
+
 		if ( isset( $options[ $key ] ) && ! empty( $options[ $key ] ) ) {
 			$image_id = absint( $options[ $key ] );
 			if ( $image_id ) {
@@ -120,14 +115,15 @@ class Smm_Utils {
 	 * Returns complete <img> tag instead of just URL.
 	 *
 	 * @since  1.0.0
-	 * @param  string $key     The image key (e.g., 'logo').
-	 * @param  string $size    Image size (default: 'full').
-	 * @param  array  $attr    Additional attributes for img tag.
-	 * @return string          Image HTML tag or empty string.
+	 * @param  string $key  The image key (e.g., 'logo').
+	 * @param  string $size Image size (default: 'full').
+	 * @param  array  $attr Additional attributes for img tag.
+	 * @return string       Image HTML tag or empty string.
 	 */
 	public static function get_image_tag( $key, $size = 'full', $attr = array() ) {
 
 		$options = get_option( self::$option_name, array() );
+
 		if ( ! isset( $options[ $key ] ) || empty( $options[ $key ] ) ) {
 			return '';
 		}
@@ -147,8 +143,6 @@ class Smm_Utils {
 
 	/**
 	 * Get social media URL.
-	 *
-	 * Convenience method for social network URLs.
 	 *
 	 * @since  1.0.0
 	 * @param  string $network Social network key (e.g., 'facebook', 'instagram').
@@ -182,6 +176,35 @@ class Smm_Utils {
 	}
 
 	/**
+	 * Get contact form shortcode.
+	 *
+	 * @since  1.0.0
+	 * @param  string $default Default shortcode.
+	 * @return string          Contact form shortcode.
+	 */
+	public static function get_form_shortcode( $default = '' ) {
+		return self::get_content( 'form_shortcode', $default );
+	}
+
+	/**
+	 * Render contact form.
+	 *
+	 * Executes the shortcode and returns the output.
+	 *
+	 * @since  1.0.0
+	 * @return string Contact form HTML or empty string.
+	 */
+	public static function render_form() {
+		$shortcode = self::get_form_shortcode();
+
+		if ( empty( $shortcode ) ) {
+			return '';
+		}
+
+		return do_shortcode( $shortcode );
+	}
+
+	/**
 	 * Check if Customizer has any content configured.
 	 *
 	 * @since  1.0.0
@@ -195,9 +218,6 @@ class Smm_Utils {
 	/**
 	 * Get all customizer options.
 	 *
-	 * Retrieves all Customizer values as an array.
-	 * Useful for debugging or bulk operations.
-	 *
 	 * @since  1.0.0
 	 * @return array Customizer options.
 	 */
@@ -206,21 +226,7 @@ class Smm_Utils {
 	}
 
 	/**
-	 * Clear customizer cache.
-	 *
-	 * Forces refresh of Customizer data.
-	 * Useful after programmatic updates.
-	 *
-	 * @since  1.0.0
-	 * @return bool True on success, false on failure.
-	 */
-	public static function clear_customizer_cache() {
-		wp_cache_delete( self::$option_name, 'options' );
-		return true;
-	}
-
-	/**
-	 * Check if specific content key exists in Customizer.
+	 * Check if specific content key exists.
 	 *
 	 * @since  1.0.0
 	 * @param  string $key The content key to check.

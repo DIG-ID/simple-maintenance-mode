@@ -195,7 +195,7 @@ class Smm_Admin {
 
 		// Alterna o estado.
 		$new_state = $this->core->is_enabled() ? 0 : 1;
-		$new_state = absint( $new_state ); // Force integer 0 or 1
+		$new_state = absint( $new_state ); // Force integer 0 or 1.
 		update_option( Smm::OPTION_ENABLED, $new_state, false );
 
 		// Redireciona de volta.
