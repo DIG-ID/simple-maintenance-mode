@@ -2,3 +2,17 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+@tailwind base
+@tailwind components
+@tailwind utilities
+
+html
+  @apply text-[100%] !important
+
+html:has(body.smm-maintenance)
+  @apply text-[16px] !important
+
+.socials
+  a
+    @apply w-9 h-9 p-2 bg-blue-shade-1 rounded-full flex justify-center items-center transition-all duration-500 hover:bg-blue-shade-3 hover:text-blue-shade-1
