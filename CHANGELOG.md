@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/) (`MAJOR.M
 - `smm_user_can_toggle` filter: who can turn maintenance on or off and preview it.
 - German (de_CH, de_DE) and Portuguese (pt_PT) translations, shipped in `languages/`.
 - Editors who can see the site during maintenance now get a "Maintenance ON" indicator in the admin bar (without the switch).
+- **Updates from GitHub Releases**: the plugin checks the latest Release of `DIG-ID/simple-maintenance-mode` (cached 12 hours) and offers it on the normal Updates screen, with "View details". Every downloaded zip is verified against the SHA-256 published with the Release before it is installed; a missing or different checksum stops the update.
+- Release workflow: each `vX.Y.Z` tag checks the version against the tag, lints, builds the assets and publishes `simple-maintenance-mode.zip` and `simple-maintenance-mode.zip.sha256`. CI on every push: versions, PHPCS, PHP 7.4 and 8.4 syntax, asset build.
+- `composer version:check` and `composer check`.
+- Install instructions for themes and the Control Center (pinned version + SHA-256 + `Plugin_Upgrader`) in the README.
 - Plugin header: real `Plugin URI`, `Requires at least: 5.8`, `Requires PHP: 7.4`, `Update URI` (stops WordPress offering updates from an unrelated wordpress.org plugin with the same slug).
 
 ### Changed

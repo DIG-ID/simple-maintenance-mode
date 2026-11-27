@@ -45,8 +45,10 @@ Os nomes internos (classes `Smm_*`, funções privadas) podem ser melhorados; os
 ## Comandos
 
 ```bash
-composer lint:php         # PHPCS — tem de dar 0 erros e 0 warnings antes de um PR
+composer check            # tudo o que a CI corre (versões + PHPCS) — tem de passar antes de um PR
+composer lint:php         # PHPCS — 0 erros e 0 warnings
 composer lint:php-fix     # PHPCBF
+composer version:check    # versões sincronizadas
 npm run dev               # servidor do Vite com HMR (não escreve a build)
 npm run prod              # build de produção para dist/
 ```
@@ -126,7 +128,8 @@ SemVer, `CHANGELOG.md` em Keep a Changelog (inglês).
 | Funcionalidade nova | MINOR |
 | Breaking (qualquer mudança ao contrato público) | MAJOR |
 
-- A versão vive no cabeçalho do plugin, na constante `SMM_VERSION`, no `Stable tag` do `README.txt` e na última entrada do `CHANGELOG.md`; têm de coincidir.
+- A versão vive no cabeçalho do plugin, na constante `SMM_VERSION`, no `Stable tag` do `README.txt`, no `package.json` e na última entrada do `CHANGELOG.md`; o `composer version:check` (`bin/check-version.php`) garante que coincidem.
+- **Updates:** `Update URI` + `includes/class-smm-updater.php` (Releases do GitHub, cache 12 h, SHA-256 verificado antes de instalar, falha fechada). Não mudar o nome dos assets da Release (`simple-maintenance-mode.zip` e `.zip.sha256`): os sites instalados procuram-nos.
 - **Em cada tarefa**, acrescentar as linhas ao `CHANGELOG.md` em `## [Unreleased]` (Added / Changed / Fixed / Removed / Deprecated / Security). Ao fechar uma versão, passam para `## [X.Y.Z] — YYYY-MM-DD` e o commit é `vX.Y.Z: short summary`.
 - Release: tag `vX.Y.Z` → a GitHub Action valida, compila e publica `simple-maintenance-mode.zip` e `simple-maintenance-mode.zip.sha256`.
 

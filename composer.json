@@ -15,7 +15,12 @@
   },
   "scripts": {
     "lint:php": "phpcs",
-    "lint:php-fix": "phpcbf"
+    "lint:php-fix": "phpcbf",
+    "version:check": "@php bin/check-version.php",
+    "check": [
+      "@version:check",
+      "@lint:php"
+    ]
   },
   "config": {
     "sort-packages": true,

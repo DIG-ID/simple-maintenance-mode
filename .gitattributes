@@ -8,6 +8,7 @@
 
 # Keep development files out of `git archive` and the release zip.
 /.github            export-ignore
+/bin                export-ignore
 /.vscode            export-ignore
 /.editorconfig      export-ignore
 /.gitattributes     export-ignore

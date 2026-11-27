@@ -1,0 +1,70 @@
+# On a version tag (v*): checks the version and the code, builds the assets,
+# packs simple-maintenance-mode.zip with its SHA-256 and publishes both on a
+# GitHub Release. Sites update from that Release (see includes/class-smm-updater.php),
+# and they verify the zip against the .sha256 before installing it.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Check version against the tag and lint
+        run: |
+          php bin/check-version.php --tag="${GITHUB_REF_NAME}"
+          composer lint:php
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run prod
+
+      - name: Pack the zip and its checksum
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          # Runtime files only: .gitattributes export-ignore keeps sources,
+          # tooling and docs for developers out of the archive.
+          git archive --format=tar --prefix=simple-maintenance-mode/ HEAD | tar -x -C build
+          # dist/ is not in git: add the fresh build (with .vite/manifest.json).
+          cp -R dist build/simple-maintenance-mode/dist
+          rm -f build/simple-maintenance-mode/dist/hot
+          test -f build/simple-maintenance-mode/dist/.vite/manifest.json
+          (cd build && zip -rqX ../simple-maintenance-mode.zip simple-maintenance-mode)
+          sha256sum simple-maintenance-mode.zip > simple-maintenance-mode.zip.sha256
+          unzip -l simple-maintenance-mode.zip
+          cat simple-maintenance-mode.zip.sha256
+
+      - name: Publish the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            simple-maintenance-mode.zip
+            simple-maintenance-mode.zip.sha256
+          generate_release_notes: true

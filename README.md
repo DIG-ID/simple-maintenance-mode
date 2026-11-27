@@ -127,6 +127,58 @@ add_action( 'smm_toggled', function ( $enabled, $user_id ) {
 
 ---
 
+## Releases and updates
+
+Every tag `vX.Y.Z` runs `.github/workflows/release.yml`: it checks that the version matches the tag, lints, builds the assets and publishes two files on the GitHub Release:
+
+- `simple-maintenance-mode.zip` — the plugin (folder `simple-maintenance-mode/`, runtime files only, built `dist/` included);
+- `simple-maintenance-mode.zip.sha256` — its SHA-256, in `sha256sum` format.
+
+URLs: `https://github.com/DIG-ID/simple-maintenance-mode/releases/download/vX.Y.Z/simple-maintenance-mode.zip` (and `.sha256`).
+
+### Updates on the sites
+
+The header `Update URI: https://github.com/DIG-ID/simple-maintenance-mode` takes the plugin off wordpress.org. WordPress asks `includes/class-smm-updater.php`, which reads the latest Release from the GitHub API (public, no token; cached 12 h, 1 h after an error) and offers it on the normal Dashboard → Updates screen. Before installing, the downloaded zip is checked against the `.sha256` of the same Release; a missing or different checksum stops the update.
+
+### Installing from a theme or the dig.id Control Center
+
+Pin a version **and its SHA-256** in your code (copy the hash from the `.sha256` asset of that Release). Never install "the latest" without a hash you trust. Then download, verify and install with core's `Plugin_Upgrader`:
+
+```php
+require_once ABSPATH . 'wp-admin/includes/file.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+$version = '1.1.0';
+$sha256  = '<64 hex characters from simple-maintenance-mode.zip.sha256>';
+$url     = "https://github.com/DIG-ID/simple-maintenance-mode/releases/download/v{$version}/simple-maintenance-mode.zip";
+
+$file = download_url( $url );
+if ( is_wp_error( $file ) ) {
+	return $file;
+}
+if ( ! hash_equals( $sha256, (string) hash_file( 'sha256', $file ) ) ) {
+	wp_delete_file( $file );
+	return new WP_Error( 'smm_checksum', 'Simple Maintenance Mode: checksum mismatch.' );
+}
+
+$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
+$result   = $upgrader->install( $file ); // A local path is installed as-is.
+wp_delete_file( $file );
+if ( true === $result ) {
+	activate_plugin( 'simple-maintenance-mode/simple-maintenance-mode.php' );
+}
+```
+
+Run it only for users with `install_plugins` (and `activate_plugins`), from a request protected by a nonce. After this first install, updates arrive through the mechanism above.
+
+### Making a release
+
+1. Move the `[Unreleased]` entries of `CHANGELOG.md` to `## [X.Y.Z] — YYYY-MM-DD`.
+2. Set `X.Y.Z` in the plugin header, `SMM_VERSION`, the `Stable tag` of `README.txt` and `package.json`; `composer version:check` must pass.
+3. Commit `vX.Y.Z: short summary` on `main`, then tag `vX.Y.Z` and push the tag. The Action does the rest.
+
+---
+
 ## Development
 
 Requires Node `^20.19.0 || >=22.12.0`.
