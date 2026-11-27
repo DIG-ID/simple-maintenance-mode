@@ -252,5 +252,4 @@ class Smm_Utils {
 		$content = self::get_content( $key, $default );
 		return wp_kses_post( $content );
 	}
-
 }

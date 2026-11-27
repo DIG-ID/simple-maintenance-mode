@@ -90,7 +90,6 @@ class Smm {
 		$this->define_public_hooks();
 		$this->define_common_hooks();
 		$this->init_customizer();
-
 	}
 
 	/**
@@ -115,42 +114,41 @@ class Smm {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-loader.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-smm-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-i18n.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-smm-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-smm-admin.php';
+		require_once plugin_dir_path( __DIR__ ) . 'admin/class-smm-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-smm-public.php';
+		require_once plugin_dir_path( __DIR__ ) . 'public/class-smm-public.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the common area in both admin area and public-facing.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-common.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-smm-common.php';
 
 		/**
 		 * Customizer integration
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-customizer.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-smm-customizer.php';
 
 		/**
 	 * The class responsible for utility functions.
 	 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-smm-utils.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-smm-utils.php';
 
 		$this->loader = new Smm_Loader();
-
 	}
 
 	/**
@@ -167,7 +165,6 @@ class Smm {
 		$plugin_i18n = new Smm_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
 	}
 
 	/**
@@ -186,7 +183,6 @@ class Smm {
 		$this->loader->add_action( 'admin_bar_menu', $plugin_admin, 'add_admin_bar_menu', 100 );
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'admin_notice' );
 		$this->loader->add_action( 'admin_post_smm_toggle', $plugin_admin, 'handle_toggle' );
-
 	}
 
 	/**
@@ -203,7 +199,6 @@ class Smm {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'template_redirect', 0 );
-
 	}
 
 
@@ -222,7 +217,6 @@ class Smm {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
-
 	}
 
 	/**
@@ -314,8 +308,12 @@ class Smm {
 		$script = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : '';
 		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
-		if ( strpos( $script, 'wp-login.php' ) !== false ) return true;
-		if ( strpos( $script, 'wp-cron.php' )  !== false ) return true;
+		if ( strpos( $script, 'wp-login.php' ) !== false ) {
+			return true;
+		}
+		if ( strpos( $script, 'wp-cron.php' ) !== false ) {
+			return true;
+		}
 
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			$allow = (bool) apply_filters( 'smm_allow_rest_request', false, $uri );
@@ -333,7 +331,6 @@ class Smm {
 		}
 
 		return false;
-
 	}
 
 	/**
@@ -348,7 +345,6 @@ class Smm {
 			admin_url( 'admin-post.php?action=smm_toggle' ),
 			self::NONCE_ACTION
 		);
-
 	}
 
 	/**
@@ -364,7 +360,5 @@ class Smm {
 			return $template;
 		}
 		return SMM_DIR . 'public/partials/smm-public-display.php';
-
 	}
-
 }

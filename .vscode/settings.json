@@ -1,0 +1,20 @@
+{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.detectIndentation": false,
+
+  "[php]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  "intelephense.environment.phpVersion": "7.4.0",
+  "intelephense.environment.includePaths": [
+    "vendor/php-stubs/wordpress-stubs"
+  ]
+}
