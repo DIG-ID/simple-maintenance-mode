@@ -31,22 +31,6 @@ class Smm_Admin {
 	private $core;
 
 	/**
-	 * Plugin slug, used as asset handle.
-	 *
-	 * @since 1.0.0
-	 * @var string
-	 */
-	private $plugin_name;
-
-	/**
-	 * Plugin version, used for cache busting.
-	 *
-	 * @since 1.0.0
-	 * @var string
-	 */
-	private $version;
-
-	/**
 	 * Sets up the class.
 	 *
 	 * @since 1.0.0
@@ -54,29 +38,7 @@ class Smm_Admin {
 	 * @param Smm_Plugin $core Core plugin class.
 	 */
 	public function __construct( $core ) {
-		$this->core        = $core;
-		$this->plugin_name = $core->get_plugin_name();
-		$this->version     = $core->get_version();
-	}
-
-	/**
-	 * Enqueues the admin stylesheet.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
-	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/smm-admin.css', array(), $this->version, 'all' );
-	}
-
-	/**
-	 * Enqueues the admin script.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
-	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/smm-admin.js', array( 'jquery' ), $this->version, false );
+		$this->core = $core;
 	}
 
 	/**

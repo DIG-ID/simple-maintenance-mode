@@ -43,12 +43,12 @@ class Smm_Public {
 	private $plugin_name;
 
 	/**
-	 * Plugin version, used for cache busting.
+	 * True while the maintenance page is being rendered.
 	 *
-	 * @since 1.0.0
-	 * @var string
+	 * @since 1.1.0
+	 * @var bool
 	 */
-	private $version;
+	private $rendering_page = false;
 
 	/**
 	 * Sets up the class.
@@ -60,27 +60,22 @@ class Smm_Public {
 	public function __construct( $core ) {
 		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
-		$this->version     = $core->get_version();
 	}
 
 	/**
-	 * Enqueues the front-end stylesheet.
+	 * Enqueues the maintenance page stylesheet — only on the maintenance page.
+	 *
+	 * Before 1.1.0 it loaded on every front-end page, maintenance on or off,
+	 * and its Tailwind base reset applied to the whole site.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/smm-public.css', array(), $this->version, 'all' );
-	}
-
-	/**
-	 * Enqueues the front-end script.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
-	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/smm-public.js', array( 'jquery' ), $this->version, false );
+		if ( ! $this->rendering_page ) {
+			return;
+		}
+		smm_vite_enqueue_style( $this->plugin_name, 'public/sass/smm-public.sass' );
 	}
 
 	/**
@@ -228,6 +223,9 @@ class Smm_Public {
 		 */
 		$smm_vars = apply_filters( 'smm_template_vars', $smm_vars );
 		set_query_var( 'smm_vars', $smm_vars );
+
+		// wp_head() in the template fires wp_enqueue_scripts, which loads the page CSS.
+		$this->rendering_page = true;
 
 		include $template;
 		exit;

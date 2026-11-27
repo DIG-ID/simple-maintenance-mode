@@ -35,14 +35,6 @@ class Smm_Common {
 	private $plugin_name;
 
 	/**
-	 * Plugin version, used for cache busting.
-	 *
-	 * @since 1.0.0
-	 * @var string
-	 */
-	private $version;
-
-	/**
 	 * Sets up the class.
 	 *
 	 * @since 1.0.0
@@ -52,26 +44,24 @@ class Smm_Common {
 	public function __construct( $core ) {
 		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
-		$this->version     = $core->get_version();
 	}
 
 	/**
-	 * Enqueues the shared stylesheet.
+	 * Enqueues the admin bar button styles, only where the button is shown.
+	 *
+	 * The node is added for users who can toggle or bypass (see
+	 * Smm_Admin::add_admin_bar_menu()), so visitors never load this file.
 	 *
 	 * @since 1.0.0
 	 * @return void
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name . '-common', SMM_URL . 'assets/css/smm-common.css', array(), $this->version, 'all' );
-	}
-
-	/**
-	 * Enqueues the shared script.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
-	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name . '-common', SMM_URL . 'assets/js/smm-common.js', array( 'jquery' ), $this->version, false );
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+		if ( ! $this->core->user_can_toggle() && ! $this->core->user_can_bypass() ) {
+			return;
+		}
+		smm_vite_enqueue_style( $this->plugin_name . '-common', 'assets/sass/smm-common.sass' );
 	}
 }

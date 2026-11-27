@@ -129,12 +129,25 @@ add_action( 'smm_toggled', function ( $enabled, $user_id ) {
 
 ## Development
 
+Requires Node `^20.19.0 || >=22.12.0`.
+
 ```bash
 composer install
 composer lint:php      # must pass with 0 errors and 0 warnings
 composer lint:php-fix
-npm ci && npm run prod # assets
+
+npm ci
+npm run dev            # Vite dev server with HMR — Sass changes show without reloading, PHP changes reload the page
+npm run prod           # production build to dist/ (hashed files + dist/.vite/manifest.json)
 ```
+
+### Assets
+
+- Sources: `public/sass/smm-public.sass` (maintenance page, Tailwind 3) and `assets/sass/smm-common.sass` (admin bar button). Entries are listed in `vite.config.mjs`.
+- PHP enqueues them by source path through `includes/smm-vite.php` (`smm_vite_enqueue_style()`), which reads the manifest.
+- `dist/` is **not** committed: the release workflow builds it into the zip. A git checkout without `npm run prod` works, but the maintenance page has no plugin styles.
+- `npm run dev` writes `dist/hot`; WordPress then loads the styles from the dev server, only when `WP_ENVIRONMENT_TYPE` is `local` or `development` and the server answers. The dev server uses the Local SSL certificate of the host (default `testing.digid`). For another site, create an untracked `.env.local` with `DEV_HOST=control-client.digid` (and `DEV_PORT=5174` to run two servers at once).
+- Loading rules: the page CSS only on the maintenance page (and its preview); the button CSS only where the admin bar shows the button. Visitors of a site with maintenance off load nothing from the plugin.
 
 Translations: after changing strings, regenerate `languages/simple-maintenance-mode.pot` with `wp i18n make-pot . languages/simple-maintenance-mode.pot --domain=simple-maintenance-mode --exclude=vendor,node_modules`, update the `.po` files and run `wp i18n make-mo languages` and `wp i18n make-php languages`.
 

@@ -10,7 +10,7 @@
 # Tooling caches.
 .phpcs-cache
 
-# Local environment and secrets.
+# Local environment and secrets (.env.local holds DEV_HOST / DEV_PORT for the Vite dev server).
 .env
 .env.*
 !.env.example
