@@ -1,60 +1,35 @@
 <?php
-
 /**
- * Fired during plugin activation
+ * Runs on plugin activation.
  *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/includes
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
- * Fired during plugin activation.
+ * Plugin activation.
  *
- * This class defines all code necessary to run during the plugin's activation.
+ * The WordPress and PHP minimums are enforced by WordPress itself from the
+ * "Requires at least" and "Requires PHP" plugin headers.
  *
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Activator {
 
 	/**
-	 * Short Description. (use period)
+	 * Creates the state option (off) when it does not exist yet.
 	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public static function activate() {
-
-		// Check WordPress version.
-		global $wp_version;
-		if ( version_compare( $wp_version, '5.8', '<' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
-			wp_die(
-				'Este plugin requer WordPress 5.8 ou superior.',
-				'Plugin Activation Error',
-				array( 'back_link' => true )
-			);
-		}
-
-		// Check PHP version.
-		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
-			wp_die(
-				'Este plugin requer PHP 7.4 ou superior.',
-				'Plugin Activation Error',
-				array( 'back_link' => true )
-			);
-		}
-
-		// Set default option if doesn't exist.
 		if ( false === get_option( 'smm_enabled' ) ) {
-			add_option( 'smm_enabled', 0, '', 'no' );
+			add_option( 'smm_enabled', 0, '', false );
 		}
 	}
 }

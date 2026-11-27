@@ -1,0 +1,198 @@
+# Copyright (C) 2026 dig.id
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Maintenance Mode 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/DIG-ID/simple-maintenance-mode/issues\n"
+"Last-Translator: dig.id\n"
+"Language-Team: dig.id\n"
+"Language: pt_PT\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-27T16:16:48+00:00\n"
+"PO-Revision-Date: 2026-11-27\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: simple-maintenance-mode\n"
+
+#. Plugin Name of the plugin
+#: simple-maintenance-mode.php
+msgid "Simple Maintenance Mode"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: simple-maintenance-mode.php
+msgid "https://github.com/DIG-ID/simple-maintenance-mode"
+msgstr ""
+
+#. Description of the plugin
+#: simple-maintenance-mode.php
+msgid "Toggle a maintenance page (HTTP 503) for visitors with one click, while logged-in editors keep seeing the site."
+msgstr "Liga com um clique uma página de manutenção (HTTP 503) para os visitantes, enquanto os editores com sessão iniciada continuam a ver o site."
+
+#. Author of the plugin
+#: simple-maintenance-mode.php
+msgid "dig.id"
+msgstr ""
+
+#. Author URI of the plugin
+#: simple-maintenance-mode.php
+msgid "https://dig.id/"
+msgstr ""
+
+#: admin/class-smm-admin.php:102
+msgid "Maintenance ON"
+msgstr "Manutenção LIGADA"
+
+#: admin/class-smm-admin.php:103
+msgid "Maintenance OFF"
+msgstr "Manutenção DESLIGADA"
+
+#: admin/class-smm-admin.php:115
+#: admin/class-smm-admin.php:159
+msgid "Visitors are seeing the maintenance page."
+msgstr "Os visitantes estão a ver a página de manutenção."
+
+#: admin/class-smm-admin.php:129
+msgid "Deactivate maintenance mode"
+msgstr "Desativar o modo de manutenção"
+
+#: admin/class-smm-admin.php:129
+msgid "Activate maintenance mode"
+msgstr "Ativar o modo de manutenção"
+
+#: admin/class-smm-admin.php:138
+msgid "View Preview"
+msgstr "Pré-visualizar"
+
+#: admin/class-smm-admin.php:158
+msgid "Maintenance mode ACTIVE."
+msgstr "Modo de manutenção ATIVO."
+
+#: admin/class-smm-admin.php:161
+msgid "Deactivate now"
+msgstr "Desativar agora"
+
+#: admin/class-smm-admin.php:181
+msgid "You are not allowed to change the maintenance mode."
+msgstr "Não tem permissão para alterar o modo de manutenção."
+
+#: admin/class-smm-admin.php:182
+#: public/class-smm-public.php:208
+msgid "Maintenance"
+msgstr "Manutenção"
+
+#: includes/class-smm-customizer.php:74
+msgid "Maintenance Mode"
+msgstr "Modo de manutenção"
+
+#: includes/class-smm-customizer.php:75
+msgid "Turn maintenance mode on or off and edit the maintenance page."
+msgstr "Ligue ou desligue o modo de manutenção e edite a página de manutenção."
+
+#: includes/class-smm-customizer.php:101
+msgid "Status"
+msgstr "Estado"
+
+#: includes/class-smm-customizer.php:123
+msgid "Maintenance mode"
+msgstr "Modo de manutenção"
+
+#: includes/class-smm-customizer.php:124
+msgid "Turn on to show the maintenance page to visitors."
+msgstr "Ligue para mostrar a página de manutenção aos visitantes."
+
+#: includes/class-smm-customizer.php:144
+msgid "Content"
+msgstr "Conteúdo"
+
+#: includes/class-smm-customizer.php:164
+msgid "Title"
+msgstr "Título"
+
+#: includes/class-smm-customizer.php:168
+#: public/partials/smm-public-display.php:19
+msgid "Under maintenance"
+msgstr "Em manutenção"
+
+#: includes/class-smm-customizer.php:186
+msgid "Message"
+msgstr "Mensagem"
+
+#: includes/class-smm-customizer.php:190
+#: public/partials/smm-public-display.php:20
+msgid "We will be back soon. We apologise for the inconvenience and thank you for your patience."
+msgstr "Voltamos em breve. Pedimos desculpa pelo incómodo e agradecemos a sua paciência."
+
+#: includes/class-smm-customizer.php:208
+msgid "Contact details"
+msgstr "Contactos"
+
+#: includes/class-smm-customizer.php:211
+msgid "Shown on the maintenance page. Leave a field empty to hide it."
+msgstr "Mostrados na página de manutenção. Deixe um campo vazio para o esconder."
+
+#: includes/class-smm-customizer.php:229
+msgid "Email"
+msgstr "Email"
+
+#: includes/class-smm-customizer.php:250
+msgid "Phone"
+msgstr "Telefone"
+
+#: includes/class-smm-customizer.php:271
+msgid "Address"
+msgstr "Morada"
+
+#: includes/class-smm-customizer.php:292
+msgid "Appearance"
+msgstr "Aparência"
+
+#: includes/class-smm-customizer.php:314
+msgid "Logo"
+msgstr "Logótipo"
+
+#: includes/class-smm-customizer.php:338
+msgid "Background colour"
+msgstr "Cor de fundo"
+
+#: includes/class-smm-customizer.php:361
+msgid "Text colour"
+msgstr "Cor do texto"
+
+#: includes/class-smm-customizer.php:382
+msgid "Social networks"
+msgstr "Redes sociais"
+
+#: includes/class-smm-customizer.php:385
+msgid "Links to the social networks. Leave a field empty to hide it."
+msgstr "Links para as redes sociais. Deixe um campo vazio para o esconder."
+
+#: includes/class-smm-customizer.php:435
+msgid "Contact form"
+msgstr "Formulário de contacto"
+
+#: includes/class-smm-customizer.php:438
+msgid "Shortcode of a contact form (e.g. Contact Form 7, WPForms)."
+msgstr "Shortcode de um formulário de contacto (ex.: Contact Form 7, WPForms)."
+
+#: includes/class-smm-customizer.php:456
+msgid "Form shortcode"
+msgstr "Shortcode do formulário"
+
+#: includes/class-smm-customizer.php:457
+msgid "Example: [contact-form-7 id=\"123\"]"
+msgstr "Exemplo: [contact-form-7 id=\"123\"]"
+
+#: public/class-smm-public.php:108
+msgid "Temporarily unavailable for maintenance."
+msgstr "Temporariamente indisponível por manutenção."
+
+#: public/class-smm-public.php:207
+msgid "Maintenance template not found."
+msgstr "Modelo de manutenção não encontrado."
+
+#: public/partials/smm-public-display.php:65
+msgid "Maintenance mode preview."
+msgstr "Pré-visualização do modo de manutenção."

@@ -1,43 +1,39 @@
 <?php
-
 /**
- * Define the internationalization functionality
+ * Loads the plugin translations.
  *
- * Loads and defines the internationalization files for this plugin
- * so that it is ready for translation.
- *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/includes
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  */
 
-/**
- * Define the internationalization functionality.
- *
- * Loads and defines the internationalization files for this plugin
- * so that it is ready for translation.
- *
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
- * @author     dig.id <hello@dig.id>
- */
-class Smm_i18n {
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
+/**
+ * Translation loading.
+ *
+ * Renamed from `Smm_i18n` in 1.1.0 (class names are case-insensitive in PHP).
+ *
+ * @since 1.0.0
+ */
+class Smm_I18n {
 
 	/**
-	 * Load the plugin text domain for translation.
+	 * Loads the translations shipped in the plugin's `languages/` folder.
 	 *
-	 * @since    1.0.0
+	 * Translations in `wp-content/languages/plugins/` still take precedence, so
+	 * a site can override them.
+	 *
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function load_plugin_textdomain() {
-
 		load_plugin_textdomain(
-			'smm',
+			'simple-maintenance-mode',
 			false,
-			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
+			dirname( plugin_basename( SMM_FILE ) ) . '/languages/'
 		);
 	}
 }

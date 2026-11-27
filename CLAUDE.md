@@ -16,7 +16,8 @@ Plugin de manutenção da dig.id, presente em quase todos os sites live. Mostra 
 - **WordPress 5.8+, PHP 7.4+** — corre em sites antigos. Cabeçalho do plugin, `README.txt`, `composer.json` e `phpcs.xml.dist` sincronizados.
   - **Porquê 5.8:** é a versão que introduziu o cabeçalho `Update URI` e o filtro `update_plugins_{$hostname}`, de que dependem os updates por GitHub Releases. Não baixar.
   - **Porquê 7.4:** o SMM está em sites antigos que ainda correm PHP 7.4.
-- Text domain: `smm`, que passa a `simple-maintenance-mode` na fase 2 (`fix/security`) · prefixos: `smm_` · `SMM_` · `Smm_`.
+- Text domain: `simple-maintenance-mode` (era `smm` até à 1.0.0) · prefixos: `smm_` · `SMM_` · `Smm_`.
+- API pública em `includes/smm-functions.php`: `smm_is_enabled()`, `smm_enable()`, `smm_disable()` (sem nonce nem capability — quem chama verifica) e a acção `smm_toggled`, disparada pelos hooks da opção. WP-CLI: `wp smm enable|disable|status`.
 
 ---
 
@@ -35,7 +36,9 @@ Há sites em produção e o Control Center já dependem disto. Qualquer mudança
 
 Os nomes internos (classes `Smm_*`, funções privadas) podem ser melhorados; os acima não.
 
-**Nunca bloquear** com a manutenção ligada: `wp-login.php`, `/wp-admin/`, `admin-ajax.php`, `wp-cron.php`, WP-CLI, a REST API (`/wp-json/…` e `?rest_route=…` — o agente do Control Center precisa dela) e utilizadores autenticados com bypass.
+**Nunca bloquear** com a manutenção ligada: `wp-login.php`, `/wp-admin/`, `admin-ajax.php`, `wp-cron.php`, WP-CLI, a REST API (`/wp-json/…` e `?rest_route=…` — o agente do Control Center precisa dela) e utilizadores autenticados com bypass. `robots.txt` e sitemaps (core e Yoast) recebem 503 em texto simples, nunca a página HTML.
+
+**Acesso** (decidido em 2026-11-27): ver o site com a manutenção ligada (`smm_user_can_bypass`) = administradores e editores; ligar, desligar e pré-visualizar (`smm_user_can_toggle`) = só `manage_options`.
 
 ---
 
@@ -106,7 +109,7 @@ Cada ficheiro PHP começa com file docblock (`@package`, `@subpackage`, `@since`
 
 ## i18n
 
-Strings traduzíveis com o text domain `smm`, fonte em **inglês**. Traduções **de_CH** (formal, `ss`, nunca `ß`) e **pt_PT**. O Customizer pode sobrepor os textos da página.
+Strings traduzíveis com o text domain `simple-maintenance-mode`, fonte em **inglês**. Traduções **de_CH** (formal, `ss`, nunca `ß`), **de_DE** (mesmo texto; o WPML dos sites usa muitas vezes `de_DE`) e **pt_PT**, em `languages/` (`.po`, `.mo` e `.l10n.php`). O Customizer pode sobrepor os textos da página. Comandos para regenerar no `README.md`.
 
 ---
 

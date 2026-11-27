@@ -1,28 +1,10 @@
 <?php
-
 /**
- * Fired when the plugin is uninstalled.
+ * Removes the plugin's options when it is deleted from the Plugins screen.
  *
- * When populating this file, consider the following flow
- * of control:
- *
- * - This method should be static
- * - Check if the $_REQUEST content actually is the plugin name
- * - Run an admin referrer check to make sure it goes through authentication
- * - Verify the output of $_GET makes sense
- * - Repeat with other user roles. Best directly by using the links/query string parameters.
- * - Repeat things for multisite. Once for a single site in the network, once sitewide.
- *
- * This file may be updated more in future version of the Boilerplate; however, this is the
- * general skeleton and outline for how the file should work.
- *
- * For more information, see the following discussion:
- * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
- *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  */
 
 // If uninstall not called from WordPress, then exit.
@@ -30,17 +12,29 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Delete plugin options.
-delete_option( 'smm_enabled' );
+/**
+ * Deletes the plugin's options on the current site.
+ *
+ * @since 1.1.0
+ * @return void
+ */
+function smm_uninstall_site() {
+	delete_option( 'smm_enabled' );
+	delete_option( 'smm_customizer' );
+}
 
-// If multisite, delete for all sites.
 if ( is_multisite() ) {
-	global $wpdb;
-	$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
-
-	foreach ( $blog_ids as $blog_id ) {
-		switch_to_blog( $blog_id );
-		delete_option( 'smm_enabled' );
+	$smm_site_ids = get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	);
+	foreach ( $smm_site_ids as $smm_site_id ) {
+		switch_to_blog( $smm_site_id );
+		smm_uninstall_site();
 		restore_current_blog();
 	}
+} else {
+	smm_uninstall_site();
 }
