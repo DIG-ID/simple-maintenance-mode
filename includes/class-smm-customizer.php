@@ -1,15 +1,16 @@
 <?php
 /**
- * Customizer Integration - 100% Native WordPress
+ * Customizer panel for the maintenance page: state, content, contacts, look,
+ * social links and contact form.
  *
- * No dependencies, no Kirki, pure WordPress Customizer API.
- * Always works, always syncs perfectly.
- *
- * @link       https://dig.id
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
+ * @package simple-maintenance-mode
+ * @subpackage Customizer
+ * @since 1.0.0
  */
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * Customizer Integration Class
@@ -24,10 +25,7 @@
  * - Social (facebook, instagram, twitter, linkedin)
  * - Form (contact form shortcode)
  *
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Customizer {
 
@@ -73,8 +71,8 @@ class Smm_Customizer {
 			array(
 				'priority'    => 160,
 				'capability'  => 'manage_options',
-				'title'       => __( 'Maintenance Mode', 'smm' ),
-				'description' => __( 'Configure o modo manutenção e o conteúdo da página.', 'smm' ),
+				'title'       => __( 'Maintenance Mode', 'simple-maintenance-mode' ),
+				'description' => __( 'Turn maintenance mode on or off and edit the maintenance page.', 'simple-maintenance-mode' ),
 			)
 		);
 
@@ -100,7 +98,7 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_toggle',
 			array(
-				'title'    => __( 'Estado', 'smm' ),
+				'title'    => __( 'Status', 'simple-maintenance-mode' ),
 				'panel'    => $this->panel_id,
 				'priority' => 5,
 			)
@@ -122,8 +120,8 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_enabled',
 			array(
-				'label'       => __( 'Modo Manutenção', 'smm' ),
-				'description' => __( 'Ative para mostrar a página de manutenção aos visitantes.', 'smm' ),
+				'label'       => __( 'Maintenance mode', 'simple-maintenance-mode' ),
+				'description' => __( 'Turn on to show the maintenance page to visitors.', 'simple-maintenance-mode' ),
 				'section'     => 'smm_toggle',
 				'type'        => 'checkbox',
 			)
@@ -143,7 +141,7 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_content',
 			array(
-				'title'    => __( 'Conteúdo', 'smm' ),
+				'title'    => __( 'Content', 'simple-maintenance-mode' ),
 				'panel'    => $this->panel_id,
 				'priority' => 10,
 			)
@@ -153,7 +151,7 @@ class Smm_Customizer {
 		$wp_customize->add_setting(
 			$this->option_name . '[title]',
 			array(
-				'default'           => 'Em Manutenção',
+				'default'           => '',
 				'type'              => 'option',
 				'sanitize_callback' => 'sanitize_text_field',
 			)
@@ -163,10 +161,11 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_title',
 			array(
-				'label'    => __( 'Título Principal', 'smm' ),
-				'section'  => 'smm_content',
-				'settings' => $this->option_name . '[title]',
-				'type'     => 'text',
+				'label'       => __( 'Title', 'simple-maintenance-mode' ),
+				'section'     => 'smm_content',
+				'settings'    => $this->option_name . '[title]',
+				'type'        => 'text',
+				'input_attrs' => array( 'placeholder' => __( 'Under maintenance', 'simple-maintenance-mode' ) ),
 			)
 		);
 
@@ -174,7 +173,7 @@ class Smm_Customizer {
 		$wp_customize->add_setting(
 			$this->option_name . '[description]',
 			array(
-				'default'           => 'Estaremos de volta brevemente. Pedimos desculpa pelo incómodo.',
+				'default'           => '',
 				'type'              => 'option',
 				'sanitize_callback' => 'wp_kses_post',
 			)
@@ -184,10 +183,11 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_description',
 			array(
-				'label'    => __( 'Mensagem', 'smm' ),
-				'section'  => 'smm_content',
-				'settings' => $this->option_name . '[description]',
-				'type'     => 'textarea',
+				'label'       => __( 'Message', 'simple-maintenance-mode' ),
+				'section'     => 'smm_content',
+				'settings'    => $this->option_name . '[description]',
+				'type'        => 'textarea',
+				'input_attrs' => array( 'placeholder' => __( 'We will be back soon. We apologise for the inconvenience and thank you for your patience.', 'simple-maintenance-mode' ) ),
 			)
 		);
 	}
@@ -205,10 +205,10 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_contact',
 			array(
-				'title'       => __( 'Contactos', 'smm' ),
+				'title'       => __( 'Contact details', 'simple-maintenance-mode' ),
 				'panel'       => $this->panel_id,
 				'priority'    => 20,
-				'description' => __( 'Informações de contacto a mostrar na página de manutenção.', 'smm' ),
+				'description' => __( 'Shown on the maintenance page. Leave a field empty to hide it.', 'simple-maintenance-mode' ),
 			)
 		);
 
@@ -216,7 +216,7 @@ class Smm_Customizer {
 		$wp_customize->add_setting(
 			$this->option_name . '[email]',
 			array(
-				'default'           => get_option( 'admin_email' ),
+				'default'           => '',
 				'type'              => 'option',
 				'sanitize_callback' => 'sanitize_email',
 			)
@@ -226,7 +226,7 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_email',
 			array(
-				'label'    => __( 'Email', 'smm' ),
+				'label'    => __( 'Email', 'simple-maintenance-mode' ),
 				'section'  => 'smm_contact',
 				'settings' => $this->option_name . '[email]',
 				'type'     => 'email',
@@ -247,7 +247,7 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_phone',
 			array(
-				'label'    => __( 'Telefone', 'smm' ),
+				'label'    => __( 'Phone', 'simple-maintenance-mode' ),
 				'section'  => 'smm_contact',
 				'settings' => $this->option_name . '[phone]',
 				'type'     => 'tel',
@@ -268,7 +268,7 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_address',
 			array(
-				'label'    => __( 'Morada', 'smm' ),
+				'label'    => __( 'Address', 'simple-maintenance-mode' ),
 				'section'  => 'smm_contact',
 				'settings' => $this->option_name . '[address]',
 				'type'     => 'textarea',
@@ -289,7 +289,7 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_visual',
 			array(
-				'title'    => __( 'Aparência', 'smm' ),
+				'title'    => __( 'Appearance', 'simple-maintenance-mode' ),
 				'panel'    => $this->panel_id,
 				'priority' => 30,
 			)
@@ -311,7 +311,7 @@ class Smm_Customizer {
 				$wp_customize,
 				'smm_logo',
 				array(
-					'label'     => __( 'Logo', 'smm' ),
+					'label'     => __( 'Logo', 'simple-maintenance-mode' ),
 					'section'   => 'smm_visual',
 					'settings'  => $this->option_name . '[logo]',
 					'mime_type' => 'image',
@@ -335,7 +335,7 @@ class Smm_Customizer {
 				$wp_customize,
 				'smm_bg_color',
 				array(
-					'label'    => __( 'Cor de Fundo', 'smm' ),
+					'label'    => __( 'Background colour', 'simple-maintenance-mode' ),
 					'section'  => 'smm_visual',
 					'settings' => $this->option_name . '[bg_color]',
 				)
@@ -358,7 +358,7 @@ class Smm_Customizer {
 				$wp_customize,
 				'smm_text_color',
 				array(
-					'label'    => __( 'Cor do Texto', 'smm' ),
+					'label'    => __( 'Text colour', 'simple-maintenance-mode' ),
 					'section'  => 'smm_visual',
 					'settings' => $this->option_name . '[text_color]',
 				)
@@ -379,10 +379,10 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_social',
 			array(
-				'title'       => __( 'Redes Sociais', 'smm' ),
+				'title'       => __( 'Social networks', 'simple-maintenance-mode' ),
 				'panel'       => $this->panel_id,
 				'priority'    => 40,
-				'description' => __( 'Links para as redes sociais (deixe vazio para não mostrar).', 'smm' ),
+				'description' => __( 'Links to the social networks. Leave a field empty to hide it.', 'simple-maintenance-mode' ),
 			)
 		);
 
@@ -432,10 +432,10 @@ class Smm_Customizer {
 		$wp_customize->add_section(
 			'smm_form',
 			array(
-				'title'       => __( 'Formulário de Contacto', 'smm' ),
+				'title'       => __( 'Contact form', 'simple-maintenance-mode' ),
 				'panel'       => $this->panel_id,
 				'priority'    => 50,
-				'description' => __( 'Shortcode do formulário de contacto (ex: Contact Form 7, WPForms).', 'smm' ),
+				'description' => __( 'Shortcode of a contact form (e.g. Contact Form 7, WPForms).', 'simple-maintenance-mode' ),
 			)
 		);
 
@@ -453,8 +453,8 @@ class Smm_Customizer {
 		$wp_customize->add_control(
 			'smm_form_shortcode',
 			array(
-				'label'       => __( 'Shortcode do Formulário', 'smm' ),
-				'description' => __( 'Exemplo: [contact-form-7 id="123"]', 'smm' ),
+				'label'       => __( 'Form shortcode', 'simple-maintenance-mode' ),
+				'description' => __( 'Example: [contact-form-7 id="123"]', 'simple-maintenance-mode' ),
 				'section'     => 'smm_form',
 				'settings'    => $this->option_name . '[form_shortcode]',
 				'type'        => 'text',
@@ -487,7 +487,7 @@ class Smm_Customizer {
 			'smm-customizer-preview',
 			plugin_dir_url( __DIR__ ) . 'admin/js/smm-customizer-preview.js',
 			array( 'customize-preview', 'jquery' ),
-			'1.0.0',
+			SMM_VERSION,
 			true
 		);
 	}

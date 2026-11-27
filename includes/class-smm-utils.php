@@ -1,18 +1,17 @@
 <?php
 /**
- * Utility Functions
+ * Helpers that read the maintenance page content from the Customizer.
  *
- * Helper functions for retrieving content from Customizer.
- * 100% Native WordPress - No Kirki, no ACF.
+ * Priority: Customizer value > `smm_content_*` filter > fallback.
  *
- * Priority: Customizer > Filters > Defaults
- *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/includes
+ * @package simple-maintenance-mode
+ * @subpackage Helpers
+ * @since 1.0.0
  */
+
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * Utility Functions Class
@@ -21,10 +20,7 @@
  *
  * All methods read from the 'smm_customizer' option array.
  *
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Utils {
 
@@ -47,10 +43,10 @@ class Smm_Utils {
 	 *
 	 * @since  1.0.0
 	 * @param  string $key     The content key (e.g., 'title', 'description').
-	 * @param  string $default Default value if not found.
+	 * @param  string $fallback Value used when the Customizer field is empty.
 	 * @return string          The content value.
 	 */
-	public static function get_content( $key, $default = '' ) {
+	public static function get_content( $key, $fallback = '' ) {
 
 		// Try Customizer.
 		$customizer_value = self::get_from_customizer( $key );
@@ -59,7 +55,7 @@ class Smm_Utils {
 		}
 
 		// Fallback to filter.
-		return (string) apply_filters( 'smm_content_' . $key, $default );
+		return (string) apply_filters( 'smm_content_' . $key, $fallback );
 	}
 
 	/**
@@ -88,10 +84,10 @@ class Smm_Utils {
 	 * @since  1.0.0
 	 * @param  string $key     The image key (e.g., 'logo').
 	 * @param  string $size    Image size (default: 'full').
-	 * @param  string $default Default URL if not found.
+	 * @param  string $fallback URL used when no image is set.
 	 * @return string          Image URL.
 	 */
-	public static function get_image( $key, $size = 'full', $default = '' ) {
+	public static function get_image( $key, $size = 'full', $fallback = '' ) {
 
 		$options = get_option( self::$option_name, array() );
 
@@ -106,7 +102,7 @@ class Smm_Utils {
 		}
 
 		// Filter.
-		return (string) apply_filters( 'smm_image_' . $key, $default );
+		return (string) apply_filters( 'smm_image_' . $key, $fallback );
 	}
 
 	/**
@@ -146,11 +142,11 @@ class Smm_Utils {
 	 *
 	 * @since  1.0.0
 	 * @param  string $network Social network key (e.g., 'facebook', 'instagram').
-	 * @param  string $default Default URL.
+	 * @param  string $fallback URL used when the field is empty.
 	 * @return string          Social media URL.
 	 */
-	public static function get_social( $network, $default = '' ) {
-		return self::get_content( 'social_' . $network, $default );
+	public static function get_social( $network, $fallback = '' ) {
+		return self::get_content( 'social_' . $network, $fallback );
 	}
 
 	/**
@@ -179,11 +175,11 @@ class Smm_Utils {
 	 * Get contact form shortcode.
 	 *
 	 * @since  1.0.0
-	 * @param  string $default Default shortcode.
+	 * @param  string $fallback Shortcode used when the field is empty.
 	 * @return string          Contact form shortcode.
 	 */
-	public static function get_form_shortcode( $default = '' ) {
-		return self::get_content( 'form_shortcode', $default );
+	public static function get_form_shortcode( $fallback = '' ) {
+		return self::get_content( 'form_shortcode', $fallback );
 	}
 
 	/**
@@ -245,11 +241,11 @@ class Smm_Utils {
 	 *
 	 * @since  1.0.0
 	 * @param  string $key     The content key.
-	 * @param  string $default Default value.
+	 * @param  string $fallback Value used when the field is empty.
 	 * @return string          Sanitized HTML content.
 	 */
-	public static function get_content_html( $key, $default = '' ) {
-		$content = self::get_content( $key, $default );
+	public static function get_content_html( $key, $fallback = '' ) {
+		$content = self::get_content( $key, $fallback );
 		return wp_kses_post( $content );
 	}
 }

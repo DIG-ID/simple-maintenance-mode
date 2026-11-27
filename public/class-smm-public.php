@@ -1,232 +1,215 @@
 <?php
-
 /**
- * The public-facing functionality of the plugin.
+ * Front end: decides which requests get the maintenance page and sends it.
  *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/public
+ * @package simple-maintenance-mode
+ * @subpackage Public
+ * @since 1.0.0
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
- * The public-facing functionality of the plugin.
+ * Front-end behaviour of the plugin.
  *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the public-facing stylesheet and JavaScript.
- *
- * @package    Smm
- * @subpackage Smm/public
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Public {
 
 	/**
-	 * The core plugin class.
+	 * Seconds sent in the Retry-After header.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      Smm    $core    The core plugin class.
+	 * @since 1.1.0
+	 * @var int
+	 */
+	const RETRY_AFTER = 600;
+
+	/**
+	 * Core plugin class.
+	 *
+	 * @since 1.0.0
+	 * @var Smm_Plugin
 	 */
 	private $core;
+
 	/**
-	 * The ID of this plugin.
+	 * Plugin slug, used as asset handle.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @since 1.0.0
+	 * @var string
 	 */
 	private $plugin_name;
 
 	/**
-	 * The version of this plugin.
+	 * Plugin version, used for cache busting.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
+	 * @since 1.0.0
+	 * @var string
 	 */
 	private $version;
 
 	/**
-	 * Initialize the class and set its properties.
+	 * Sets up the class.
 	 *
-	 * @since    1.0.0
-	 * @param      string $plugin_name       The name of the plugin.
-	 * @param      string $version    The version of this plugin.
+	 * @since 1.0.0
+	 *
+	 * @param Smm_Plugin $core Core plugin class.
 	 */
 	public function __construct( $core ) {
-
 		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
 		$this->version     = $core->get_version();
 	}
 
 	/**
-	 * Register the stylesheets for the public-facing side of the site.
+	 * Enqueues the front-end stylesheet.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Smm_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Smm_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/smm-public.css', array(), $this->version, 'all' );
 	}
 
 	/**
-	 * Register the JavaScript for the public-facing side of the site.
+	 * Enqueues the front-end script.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Smm_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Smm_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/smm-public.js', array( 'jquery' ), $this->version, false );
 	}
 
 	/**
-	 * Main template_redirect hook.
+	 * Answers robots.txt and sitemaps with a plain-text 503 while maintenance is on.
 	 *
-	 * Decides whether to show the maintenance template based on:
-	 * - Plugin enabled status
-	 * - User bypass capabilities
-	 * - Request exceptions (login, cron, etc.)
-	 * - Preview mode (?smm_preview=1)
-	 * - Customizer preview (is_customize_preview) - ONLY if maintenance is ON
+	 * One consistent "temporarily unavailable" signal for crawlers: serving the
+	 * sitemaps would send them to URLs that all answer 503, and the HTML page
+	 * makes no sense where a crawler expects text or XML.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param WP $wp Current WordPress environment.
+	 * @return void
+	 */
+	public function block_crawler_files( $wp ) {
+		if ( ! $this->core->is_enabled() || $this->core->user_can_bypass() ) {
+			return;
+		}
+		if ( ! $this->core->is_robots_or_sitemap_request( $wp->query_vars ) ) {
+			return;
+		}
+
+		$this->send_unavailable_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		echo esc_html__( 'Temporarily unavailable for maintenance.', 'simple-maintenance-mode' );
+		exit;
+	}
+
+	/**
+	 * Shows the maintenance page when it applies.
+	 *
+	 * - Maintenance on: visitors get the page with a 503, unless they can bypass
+	 *   or the request is one that must always pass.
+	 * - `?smm_preview=1`: users who can toggle see the page with a 200, on or off.
+	 * - Customizer preview while maintenance is on: the page, so it can be edited live.
 	 *
 	 * @since 1.0.0
+	 * @return void
 	 */
 	public function template_redirect() {
-
-		// Check if we're in Customizer preview.
-		$is_customizer_preview = is_customize_preview();
-
-		// Check if manual preview mode is active.
+		$is_active         = $this->core->is_enabled();
 		$is_manual_preview = $this->is_manual_preview();
 
-		// Check if maintenance mode is active.
-		$is_active = $this->core->is_enabled();
-
-		// If not active and not in manual preview mode, exit early.
 		if ( ! $is_active && ! $is_manual_preview ) {
 			return;
 		}
 
-		// If in Customizer preview AND maintenance is ON, show template.
-		if ( $is_customizer_preview && $is_active ) {
+		if ( $is_manual_preview || ( $is_active && is_customize_preview() ) ) {
 			$this->show_maintenance_template( true );
 			return;
 		}
 
-		// If manual preview mode (for admins only).
-		if ( $is_manual_preview ) {
-			$this->show_maintenance_template( true );
+		if ( $this->core->user_can_bypass() || $this->core->should_allow_request() ) {
 			return;
 		}
 
-		// If maintenance is active, check bypass and exceptions.
-		if ( $is_active ) {
-			if ( $this->core->user_can_bypass() || $this->core->should_allow_request() ) {
-				return;
-			}
-
-			// Show maintenance template (not preview).
-			$this->show_maintenance_template( false );
-		}
+		$this->show_maintenance_template( false );
 	}
 
-
 	/**
-	 * Check if manual preview mode is active.
+	 * Whether the request is a manual preview (`?smm_preview=1`) by a user who can toggle.
 	 *
-	 * Manual preview mode allows admins to preview the maintenance page
-	 * using the ?smm_preview=1 parameter.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 * @return bool True if manual preview is active, false otherwise.
+	 * @since 1.0.0
+	 * @return bool
 	 */
 	private function is_manual_preview() {
-		// Check for preview parameter.
-		if ( ! isset( $_GET['smm_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only preview of a public page, gated by capability.
+		if ( ! isset( $_GET['smm_preview'] ) || '1' !== $_GET['smm_preview'] ) {
 			return false;
 		}
-
-		// Verify value is '1'.
-		if ( '1' !== $_GET['smm_preview'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return false;
-		}
-
-		// Only allow for users with manage_options capability.
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-
-		return true;
+		return $this->core->user_can_toggle();
 	}
 
 	/**
-	 * Include the maintenance template and send proper HTTP headers.
+	 * Sends the 503 headers and tells caching plugins not to store the response.
 	 *
-	 * @since  1.0.0
-	 * @access private
-	 * @param  bool $is_preview Whether this is a preview (don't send 503 headers).
+	 * @since 1.1.0
+	 * @return void
+	 */
+	private function send_unavailable_headers() {
+		status_header( 503 );
+		header( 'Retry-After: ' . self::RETRY_AFTER );
+		header( 'X-Robots-Tag: noindex, nofollow', true );
+		nocache_headers();
+
+		// Constant names are fixed by the caching plugins (WP Rocket, W3TC, SG Optimizer…).
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Read by caching plugins.
+		}
+		if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+			define( 'DONOTCACHEOBJECT', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Read by caching plugins.
+		}
+		if ( ! defined( 'DONOTMINIFY' ) ) {
+			define( 'DONOTMINIFY', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Read by caching plugins.
+		}
+	}
+
+	/**
+	 * Sends the maintenance page and stops.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $is_preview True for previews: answered with 200, no 503 headers.
+	 * @return void
 	 */
 	private function show_maintenance_template( $is_preview = false ) {
-
-		// Only set 503 headers if NOT in preview mode.
-		if ( ! $is_preview ) {
-			status_header( 503 );
-			header( 'Retry-After: 600' );
-			header( 'X-Robots-Tag: noindex, nofollow', true );
+		if ( $is_preview ) {
 			nocache_headers();
-
-			if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-				define( 'DONOTCACHEPAGE', true );
-			}
-			if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
-				define( 'DONOTCACHEOBJECT', true );
-			}
-			if ( ! defined( 'DONOTMINIFY' ) ) {
-				define( 'DONOTMINIFY', true );
-			}
+		} else {
+			$this->send_unavailable_headers();
 		}
 
-		// Get template path (theme override or plugin default).
-		$template = $this->core->get_maintenance_template();
-		$template = apply_filters( 'smm_maintenance_template', $template );
+		/**
+		 * Filters the path of the maintenance template.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $template Theme override or the plugin's default template.
+		 */
+		$template = apply_filters( 'smm_maintenance_template', $this->core->get_maintenance_template() );
 
 		if ( ! is_readable( $template ) ) {
 			wp_die(
-				esc_html__( 'Maintenance template not found.', 'smm' ),
-				esc_html__( 'Maintenance', 'smm' ),
-				array( 'response' => 503 )
+				esc_html__( 'Maintenance template not found.', 'simple-maintenance-mode' ),
+				esc_html__( 'Maintenance', 'simple-maintenance-mode' ),
+				array( 'response' => $is_preview ? 200 : 503 )
 			);
 		}
 
-		// Disponibiliza variáveis úteis para o template.
 		$smm_vars = array(
 			'site_name'             => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 			'home_url'              => home_url( '/' ),
@@ -235,20 +218,17 @@ class Smm_Public {
 			'is_customizer'         => is_customize_preview(),
 			'is_maintenance_active' => $this->core->is_enabled(),
 		);
-		set_query_var( 'smm_vars', $smm_vars );
 
 		/**
-		 * Filter maintenance template variables.
+		 * Filters the variables available to the template through `get_query_var( 'smm_vars' )`.
 		 *
 		 * @since 1.0.0
 		 *
 		 * @param array $smm_vars Template variables.
 		 */
 		$smm_vars = apply_filters( 'smm_template_vars', $smm_vars );
-
 		set_query_var( 'smm_vars', $smm_vars );
 
-		// Include the template.
 		include $template;
 		exit;
 	}

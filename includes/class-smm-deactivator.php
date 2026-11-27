@@ -1,37 +1,33 @@
 <?php
 /**
- * Fired during plugin deactivation
+ * Runs on plugin deactivation.
  *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/includes
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
- * Fired during plugin deactivation.
+ * Plugin deactivation.
  *
- * This class defines all code necessary to run during the plugin's deactivation.
- *
- * @since      1.0.0
- * @package    Smm
- * @subpackage Smm/includes
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Deactivator {
 
 	/**
-	 * Short Description. (use period)
+	 * Turns maintenance mode off.
 	 *
-	 * Long Description.
+	 * Without this, reactivating the plugin later would put the site straight
+	 * back into maintenance. Fires `smm_toggled` if it was on.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public static function deactivate() {
-
-		// Turn off maintenance mode when plugin is deactivated.
-		// This prevents the site from being locked if plugin is deactivated while active.
-		update_option( 'smm_enabled', 0, false );
+		smm_disable();
 	}
 }

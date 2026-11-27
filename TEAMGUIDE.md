@@ -43,11 +43,13 @@ O **Simple Maintenance Mode** é um plugin WordPress desenvolvido internamente p
 | Pessoa | O Que Vê |
 |--------|----------|
 | **Visitantes (não logados)** | Página de manutenção (erro 503) |
-| **Administradores** | Site normal (podem trabalhar) |
-| **Outros utilizadores logados** | Site normal (se tiverem permissões `manage_options` ou `edit_others_pages`) |
-| **Página de login** | Sempre acessível (para ninguém ficar bloqueado) |
-| **WP Cron** | Funciona normalmente |
-| **AJAX/REST API** | Funciona para utilizadores logados |
+| **Administradores** | Site normal; ligam e desligam a manutenção e vêem o preview |
+| **Editores** | Site normal e o estado "Maintenance ON" na admin bar, mas **não** ligam nem desligam (desde a 1.1.0; filtro `smm_user_can_toggle` para abrir a excepção) |
+| **Página de login, wp-admin, WP Cron, WP-CLI** | Sempre acessíveis (para ninguém ficar bloqueado) |
+| **REST API** | Sempre acessível (o agente do Control Center precisa dela) |
+| **robots.txt e sitemaps** | 503 em texto simples |
+
+Também se liga e desliga por WP-CLI: `wp smm enable`, `wp smm disable`, `wp smm status`.
 
 ---
 

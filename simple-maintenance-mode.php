@@ -1,28 +1,25 @@
 <?php
-
 /**
- * The plugin bootstrap file
+ * Plugin bootstrap: header, constants, activation hooks and start-up.
  *
- * This file is read by WordPress to generate the plugin information in the plugin
- * admin area. This file also includes all of the dependencies used by the plugin,
- * registers the activation and deactivation functions, and defines a function
- * that starts the plugin.
- *
- * @link              https://dig.id
- * @since             1.0.0
- * @package           Smm
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  *
  * @wordpress-plugin
  * Plugin Name:       Simple Maintenance Mode
- * Plugin URI:        https://#
- * Description:       Simple Maintenance Mode is a simple plugin to toggle the maintenance mode in a WordPress site.
+ * Plugin URI:        https://github.com/DIG-ID/simple-maintenance-mode
+ * Description:       Toggle a maintenance page (HTTP 503) for visitors with one click, while logged-in editors keep seeing the site.
  * Version:           1.0.0
+ * Requires at least: 5.8
+ * Requires PHP:      7.4
  * Author:            dig.id
  * Author URI:        https://dig.id/
- * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       smm
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       simple-maintenance-mode
  * Domain Path:       /languages
+ * Update URI:        https://github.com/DIG-ID/simple-maintenance-mode
  */
 
 // If this file is called directly, abort.
@@ -31,81 +28,77 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Currently plugin version.
- * Start at version 1.0.0 and use SemVer - https://semver.org
- * Rename this for your plugin and update it as you release new versions.
+ * Plugin version. Keep in sync with the header above, README.txt and CHANGELOG.md.
+ *
+ * @since 1.0.0
  */
 define( 'SMM_VERSION', '1.0.0' );
 
 /**
- * The unique identifier of this plugin.
+ * Absolute path to the main plugin file.
  *
- * @since    1.0.0
- * @access   private
- * @var      string    $plugin_name    The string used to uniquely identify this plugin.
+ * @since 1.1.0
+ */
+define( 'SMM_FILE', __FILE__ );
+
+/**
+ * Absolute path to the plugin directory, with trailing slash.
+ *
+ * @since 1.0.0
  */
 define( 'SMM_DIR', plugin_dir_path( __FILE__ ) );
 
 /**
- * The current version of the plugin.
+ * URL of the plugin directory, with trailing slash.
  *
- * @since    1.0.0
- * @access   private
- * @var      string    $version    The current version of the plugin.
+ * @since 1.0.0
  */
 define( 'SMM_URL', plugin_dir_url( __FILE__ ) );
 
-
 /**
- * The code that runs during plugin activation.
- * This action is documented in includes/class-smm-activator.php
+ * Runs on plugin activation.
+ *
+ * @since 1.1.0
+ * @return void
  */
-function activate_smm() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-smm-activator.php';
+function smm_activate() {
+	require_once SMM_DIR . 'includes/class-smm-activator.php';
 	Smm_Activator::activate();
 }
 
 /**
- * The code that runs during plugin deactivation.
- * This action is documented in includes/class-smm-deactivator.php
+ * Runs on plugin deactivation.
+ *
+ * @since 1.1.0
+ * @return void
  */
-function deactivate_smm() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-smm-deactivator.php';
+function smm_deactivate() {
+	require_once SMM_DIR . 'includes/class-smm-deactivator.php';
 	Smm_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_smm' );
-register_deactivation_hook( __FILE__, 'deactivate_smm' );
+register_activation_hook( __FILE__, 'smm_activate' );
+register_deactivation_hook( __FILE__, 'smm_deactivate' );
 
-/**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
-require plugin_dir_path( __FILE__ ) . 'includes/class-smm.php';
+require_once SMM_DIR . 'includes/smm-functions.php';
+require_once SMM_DIR . 'includes/class-smm-plugin.php';
 
-/**
- * Wrapper for Smm_Utils::get_content().
- *
- * @param string $key
- * @param string $default
- * @return string
- */
-function smm_get_content( $key, $default = '' ) {
-	return Smm_Utils::get_content( $key, $default );
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once SMM_DIR . 'includes/class-smm-cli.php';
+	WP_CLI::add_command( 'smm', 'Smm_CLI' );
 }
 
 /**
- * Begins execution of the plugin.
+ * Starts the plugin.
  *
- * Since everything within the plugin is registered via hooks,
- * then kicking off the plugin from this point in the file does
- * not affect the page life cycle.
+ * Everything is registered through hooks, so running this while the plugin
+ * file loads does not affect the page life cycle.
  *
- * @since    1.0.0
+ * @since 1.1.0
+ * @return void
  */
-function run_smm() {
-
-	$plugin = new Smm();
-	$plugin->run();
+function smm_run() {
+	$smm_plugin = new Smm_Plugin();
+	$smm_plugin->run();
 }
-run_smm();
+smm_run();

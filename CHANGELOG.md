@@ -17,10 +17,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/) (`MAJOR.M
 - Development tooling: Composer with PHPCS (WordPress Coding Standards 3, PHPCompatibilityWP for PHP 7.4+, WordPress stubs) and the `lint:php` / `lint:php-fix` scripts.
 - `phpcs.xml.dist`, `.editorconfig`, `.gitattributes` (LF line endings, development files kept out of release archives) and shared VS Code settings.
 - `CLAUDE.md` with the project rules and the public contract, and this changelog.
+- PHP API for the dig.id Control Center, themes and scripts: `smm_is_enabled()`, `smm_enable()`, `smm_disable()`.
+- WP-CLI commands: `wp smm enable`, `wp smm disable`, `wp smm status [--format=json]`.
+- `smm_toggled` action (`bool $enabled, int $user_id`), fired once whenever maintenance is turned on or off — admin bar, Customizer, PHP API, WP-CLI or plugin deactivation.
+- `smm_user_can_toggle` filter: who can turn maintenance on or off and preview it.
+- German (de_CH, de_DE) and Portuguese (pt_PT) translations, shipped in `languages/`.
+- Editors who can see the site during maintenance now get a "Maintenance ON" indicator in the admin bar (without the switch).
+- Plugin header: real `Plugin URI`, `Requires at least: 5.8`, `Requires PHP: 7.4`, `Update URI` (stops WordPress offering updates from an unrelated wordpress.org plugin with the same slug).
 
 ### Changed
 - `package-lock.json` is no longer listed in `.gitignore`, so lockfile updates are committed and asset builds stay reproducible; `.gitignore` reduced to what the project actually produces.
-- Code formatting brought in line with the WordPress Coding Standards (automatic fixes only, no behaviour change).
+- Code formatting brought in line with the WordPress Coding Standards; full PHPDoc on every file; comments in English.
+- **Only administrators (`manage_options`) can turn maintenance on or off** and use `?smm_preview=1`. Editors still see the normal site during maintenance but no longer get the switch. To restore the old behaviour on a site: `add_filter( 'smm_user_can_toggle', function ( $can ) { return $can || current_user_can( 'edit_others_pages' ); } );`
+- **Text domain renamed from `smm` to `simple-maintenance-mode`** (matches the plugin slug). Translations made in WPML String Translation under the `smm` domain must be redone under the new domain.
+- Default texts of the maintenance page are in English and translatable (they were hard-coded in Portuguese); the Customizer still overrides them. Customizer labels in English.
+- `robots.txt` and XML sitemaps (WordPress core and Yoast SEO) answer a plain-text 503 while maintenance is on, instead of the HTML maintenance page or the normal file.
+- The REST API (`/wp-json/…` and `?rest_route=…`) is never blocked, for any visitor; the Control Center agent needs it during maintenance.
+- Translations load on `init` (WordPress 6.7+ warns about earlier loading).
+- Internal classes renamed: `Smm` → `Smm_Plugin`, `Smm_i18n` → `Smm_I18n`; `activate_smm()`, `deactivate_smm()` and `run_smm()` → `smm_activate()`, `smm_deactivate()` and `smm_run()`.
+
+### Removed
+- `smm_allow_rest_request` filter: REST requests are always allowed now.
+- Activation checks for the WordPress and PHP versions (WordPress enforces the plugin headers); they also deactivated the wrong file.
+
+### Fixed
+- Contact lines with empty fields are hidden; the placeholders `addresss`, `email` and `phone` no longer appear on the page.
+- The maintenance page printed two `<title>` tags with themes that support `title-tag`.
+- Uninstall also deletes the `smm_customizer` option, and on multisite covers every site (it used a direct query).
+
+### Security
+- Address on the maintenance page is escaped (`nl2br( esc_html() )`). It was printed as-is: the Customizer strips tags when saving, but a value from the `smm_content_address` filter or written to the option directly (import, migration, WP-CLI) reached the page unescaped.
+- `mailto:` and `tel:` links are built from a sanitised e-mail and a digits-only number and escaped with `esc_url()`.
 
 ## [1.0.0] — 2026-02-18
 

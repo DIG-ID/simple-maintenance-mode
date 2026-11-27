@@ -1,109 +1,77 @@
 <?php
-
 /**
- * The common functionality of the plugin.
+ * Assets shared by the admin and the front end (admin bar button styles).
  *
- * @link       https://dig.id
- * @since      1.0.0
- *
- * @package    Smm
- * @subpackage Smm/common
+ * @package simple-maintenance-mode
+ * @subpackage Core
+ * @since 1.0.0
  */
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
- * The common functionality of the plugin.
+ * Shared assets.
  *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the common stylesheet and JavaScript.
- *
- * @package    Smm
- * @subpackage Smm/common
- * @author     dig.id <hello@dig.id>
+ * @since 1.0.0
  */
 class Smm_Common {
 
 	/**
-	 * The core plugin class.
+	 * Core plugin class.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      Smm    $core    The core plugin class.
+	 * @since 1.0.0
+	 * @var Smm_Plugin
 	 */
 	private $core;
 
 	/**
-	 * The ID of this plugin.
+	 * Plugin slug, used as asset handle prefix.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @since 1.0.0
+	 * @var string
 	 */
 	private $plugin_name;
 
 	/**
-	 * The version of this plugin.
+	 * Plugin version, used for cache busting.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
+	 * @since 1.0.0
+	 * @var string
 	 */
 	private $version;
 
 	/**
-	 * Initialize the class and set its properties.
+	 * Sets up the class.
 	 *
-	 * @since    1.0.0
-	 * @param      string $plugin_name       The name of this plugin.
-	 * @param      string $version    The version of this plugin.
+	 * @since 1.0.0
+	 *
+	 * @param Smm_Plugin $core Core plugin class.
 	 */
 	public function __construct( $core ) {
-
 		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
 		$this->version     = $core->get_version();
 	}
 
 	/**
-	 * Register the stylesheets for the admin area.
+	 * Enqueues the shared stylesheet.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Smm_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Smm_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name . '-common', SMM_URL . 'assets/css/smm-common.css', array(), $this->version, 'all' );
 	}
 
 	/**
-	 * Register the JavaScript for the admin area.
+	 * Enqueues the shared script.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @return void
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Smm_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Smm_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_script( $this->plugin_name . '-common', SMM_URL . 'assets/js/smm-common.js', array( 'jquery' ), $this->version, false );
 	}
 }

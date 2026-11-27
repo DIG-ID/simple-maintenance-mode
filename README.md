@@ -1,471 +1,141 @@
 # Simple Maintenance Mode
 
-**Version:** 1.0.0  
-**Author:** dig.id  
-**License:** GPLv2 or later  
-**Requires WordPress:** 5.8+  
-**Tested up to:** 6.4  
+dig.id's maintenance plugin. One click in the admin bar shows visitors a maintenance page (HTTP 503), while administrators and editors keep seeing the normal site.
 
-A lightweight and professional WordPress plugin to toggle maintenance mode with a single click. Perfect for site updates, maintenance work, or any situation where you need to temporarily hide your site from visitors.
+- **Requires:** WordPress 5.8+, PHP 7.4+
+- **Licence:** GPL-2.0-or-later
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 ---
 
-## 🚀 Features
+## What it does
 
-### Core Functionality
-- **One-Click Toggle** - Enable/disable maintenance mode from the WordPress Admin Bar
-- **Visual Status Indicator** - Red button when active, green when inactive
-- **Admin Notice** - Clear notification in dashboard when maintenance mode is active
-- **Preview Mode** - View maintenance page while logged in using `?smm_preview=1`
-- **Smart Bypass** - Administrators automatically see the normal site
-- **Proper HTTP Headers** - Sends 503 status code with Retry-After for SEO compliance
+| Request | Maintenance on |
+|---|---|
+| Anonymous visitors | Maintenance page, HTTP **503** + `Retry-After` + `X-Robots-Tag: noindex, nofollow`, never cached (`DONOTCACHEPAGE`, no-cache headers) |
+| Administrators and editors (logged in) | Normal site |
+| `robots.txt` and XML sitemaps (core and Yoast SEO) | Plain-text 503, same headers |
+| wp-admin, `admin-ajax.php`, `wp-login.php`, `wp-cron.php`, WP-CLI | Never blocked |
+| REST API (`/wp-json/…` and `?rest_route=…`) | Never blocked: the dig.id Control Center agent uses it during maintenance |
+| Front-end AJAX (e.g. WooCommerce `?wc-ajax=`) | Blocked for visitors unless allowed with `smm_allow_ajax_action` |
 
-### Flexibility & Customization
-- **Template Override System** - Copy template to your theme to customize without losing changes on updates
-- **ACF Pro Integration** - Manage content via custom fields (title, description, contact info)
-- **Full Shortcode Support** - Use any WordPress shortcode in the maintenance template
-- **Theme Style Inheritance** - Automatically includes `wp_head()` and `wp_footer()`
-- **Developer-Friendly Filters** - Customize behavior via WordPress hooks
+### Who can do what
 
-### Security & Performance
-- **Nonce Verification** - All state changes protected with security nonces
-- **Capability Checks** - Proper WordPress permissions (`manage_options`)
-- **Smart Exception Handling** - Automatically allows login, cron, AJAX, and REST API (configurable)
-- **No Cache Interference** - Sets proper no-cache headers
-- **Clean Code** - Built on WordPress Plugin Boilerplate standards
+| | Administrator | Editor |
+|---|---|---|
+| Sees the normal site while maintenance is on | yes | yes |
+| Sees the "Maintenance ON" state in the admin bar and the admin notice | yes | yes |
+| Turns maintenance on or off, previews the page (`?smm_preview=1`) | yes | **no** (since 1.1.0) |
 
----
-
-## 📦 Installation
-
-### Automatic Installation
-1. Upload the `simple-maintenance-mode` folder to `/wp-content/plugins/`
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Look for the toggle button in the Admin Bar
-
-### Manual Installation
-1. Download the plugin ZIP file
-2. Go to **Plugins > Add New > Upload Plugin**
-3. Choose the ZIP file and click **Install Now**
-4. Activate the plugin
-
----
-
-## 🎯 Usage
-
-### Basic Usage
-
-1. **Activate Maintenance Mode**
-   - Look for the toggle button in the WordPress Admin Bar (top of screen)
-   - Click the button to activate - it will turn red
-   - Visitors now see the maintenance page
-
-2. **Deactivate Maintenance Mode**
-   - Click the red toggle button again
-   - Button turns green - site is live
-
-3. **Preview Maintenance Page**
-   - Click "View Preview" in the Admin Bar dropdown
-   - Or add `?smm_preview=1` to any URL while logged in
-
-### Who Can See What?
-
-| User Type | Sees |
-|-----------|------|
-| **Visitors (logged out)** | Maintenance page (503 error) |
-| **Administrators** | Normal site (bypass) |
-| **Logged-in users** | Normal site (if they have `manage_options` or `edit_others_pages`) |
-| **Login page** | Always accessible |
-| **WP Cron** | Always runs |
-| **AJAX requests** | Allowed for logged-in users |
-| **REST API** | Allowed for logged-in users |
-
----
-
-## 🎨 Customizing the Template
-
-### Method 1: Theme Override (Recommended)
-
-This method preserves your changes when updating the plugin:
-
-1. Create this folder in your theme:
-   ```
-   /wp-content/themes/your-theme/simple-maintenance-mode/
-   ```
-
-2. Copy the default template:
-   ```
-   From: /wp-content/plugins/simple-maintenance-mode/public/partials/smm-public-display.php
-   To: /wp-content/themes/your-theme/simple-maintenance-mode/maintenance.php
-   ```
-
-3. Edit `maintenance.php` as desired - it's now your custom template!
-
-### Method 2: Direct Edit (Not Recommended)
-
-Edit the file directly in the plugin:
-```
-/wp-content/plugins/simple-maintenance-mode/public/partials/smm-public-display.php
-```
-
-**Warning:** Changes will be lost when updating the plugin.
-
-### Template Variables
-
-The template has access to these variables via `get_query_var('smm_vars')`:
+To let editors toggle again on one site, add to the theme:
 
 ```php
-$smm_vars = array(
-    'site_name'  => 'Your Site Name',
-    'home_url'   => 'https://yoursite.com/',
-    'login_url'  => 'https://yoursite.com/wp-login.php',
-    'is_preview' => true/false
+add_filter( 'smm_user_can_toggle', function ( $can ) {
+	return $can || current_user_can( 'edit_others_pages' );
+} );
+```
+
+---
+
+## Usage
+
+- **Toggle:** the "Maintenance ON/OFF" button in the admin bar.
+- **Preview:** "View Preview" under that button, or add `?smm_preview=1` to any URL. Answers 200, without the 503 headers.
+- **Content:** Appearance → Customize → Maintenance Mode (title, message, contact details, logo, social links). The Customizer can also turn maintenance on and off. Empty fields are not shown.
+- **Languages:** the default texts are translated into German (de_CH, de_DE) and Portuguese (pt_PT). Texts entered in the Customizer replace them.
+
+### WP-CLI
+
+```bash
+wp smm enable
+wp smm disable
+wp smm status [--format=json]
+```
+
+### PHP API
+
+For themes, deploy scripts and the dig.id Control Center agent:
+
+```php
+smm_is_enabled(); // bool, after the smm_enabled filter.
+smm_enable();     // true if it changed, false if it was already on.
+smm_disable();    // true if it changed, false if it was already off.
+```
+
+These functions do not check nonces or capabilities: check permissions before calling them on behalf of a user. The state is stored in the `smm_enabled` option (`1` / `0`).
+
+---
+
+## Customising the page
+
+### Template override
+
+Copy `public/partials/smm-public-display.php` to `wp-content/themes/<theme>/simple-maintenance-mode/maintenance.php` and edit it there. Variables are available through `get_query_var( 'smm_vars' )`:
+
+```php
+array(
+	'site_name'             => 'Site name',
+	'home_url'              => 'https://example.com/',
+	'login_url'             => 'https://example.com/wp-login.php',
+	'is_preview'            => false, // true for ?smm_preview=1 and the Customizer.
+	'is_customizer'         => false,
+	'is_maintenance_active' => true,
 );
 ```
 
----
+Escape every value you print: Customizer content is user input.
 
-## 🔌 ACF Pro Integration
-
-### Setup
-
-1. Install and activate **ACF Pro**
-2. Create an options page (add to your theme's `functions.php`):
+### Content helpers
 
 ```php
-if( function_exists('acf_add_options_page') ) {
-    acf_add_options_page(array(
-        'page_title' => 'Maintenance Settings',
-        'menu_title' => 'Maintenance',
-        'menu_slug'  => 'smm-options',
-        'capability' => 'manage_options',
-        'redirect'   => false
-    ));
-}
+smm_get_content( 'title', __( 'Under maintenance', 'simple-maintenance-mode' ) );
+Smm_Utils::get_social( 'instagram' );
+Smm_Utils::get_image_tag( 'logo', 'full' );
 ```
 
-3. Add field groups with fields named starting with `smm_`:
-   - `smm_title` - Main heading
-   - `smm_description` - Message text
-   - `smm_address` - Contact address
-   - `smm_email` - Contact email
-   - `smm_phone` - Contact phone
-
-### Using ACF Fields in Template
-
-```php
-<h1><?php echo smm_get_content( 'title', 'Default Title' ); ?></h1>
-<p><?php echo smm_get_content( 'description', 'Default message' ); ?></p>
-```
-
-The `smm_get_content()` function:
-- First checks for ACF field `smm_{key}` in options
-- Falls back to the default value if field doesn't exist
-- Can also be filtered via `smm_content_{key}` hook
+`smm_get_content()` returns the Customizer value, or the `smm_content_{key}` filter applied to the fallback.
 
 ---
 
-## 💬 Using Shortcodes
-
-The template fully supports WordPress shortcodes. Examples:
-
-### Contact Form 7
-```php
-<?php echo do_shortcode( '[contact-form-7 id="123" title="Contact"]' ); ?>
-```
-
-### WooCommerce
-```php
-<?php echo do_shortcode( '[products limit="4" columns="4"]' ); ?>
-```
-
-### Custom Shortcodes
-```php
-<?php echo do_shortcode( '[your_custom_shortcode]' ); ?>
-```
-
-Since the template includes `wp_head()` and `wp_footer()`, all required styles and scripts will load automatically.
-
----
-
-## 🛠️ Developer Hooks
+## Hooks
 
 ### Filters
 
-**Override Maintenance Status**
-```php
-add_filter( 'smm_enabled', function( $enabled ) {
-    // Force maintenance mode based on custom logic
-    return true;
-});
-```
+| Filter | Arguments | Purpose |
+|---|---|---|
+| `smm_enabled` | `bool $enabled` | Force maintenance on or off |
+| `smm_user_can_bypass` | `bool $can` | Who sees the normal site (default: administrators and editors) |
+| `smm_user_can_toggle` | `bool $can` | Who can turn maintenance on or off and preview it (default: `manage_options`) — since 1.1.0 |
+| `smm_allow_request` | `bool $allow, string $uri` | Let other front-end requests through |
+| `smm_allow_ajax_action` | `bool $allow, string $action` | Let front-end AJAX actions through |
+| `smm_maintenance_template` | `string $template` | Path of the template |
+| `smm_template_vars` | `array $vars` | Template variables |
+| `smm_content_{key}` | `string $fallback` | Content when the Customizer field is empty |
+| `smm_image_{key}` | `string $fallback` | Image URL when none is set |
 
-**Customize Bypass Logic**
-```php
-add_filter( 'smm_user_can_bypass', function( $can_bypass ) {
-    // Allow specific users
-    if ( current_user_can( 'editor' ) ) {
-        return true;
-    }
-    return $can_bypass;
-});
-```
+### Actions
 
-**Allow Specific REST API Endpoints**
+| Action | Arguments | Fires |
+|---|---|---|
+| `smm_toggled` | `bool $enabled, int $user_id` | Whenever maintenance is turned on or off: admin bar, Customizer, PHP API, WP-CLI, plugin deactivation. `$user_id` is 0 without a logged-in user (WP-CLI without `--user`, the Control Center agent). Since 1.1.0. |
+
 ```php
-add_filter( 'smm_allow_rest_request', function( $allow, $uri ) {
-    // Allow specific API endpoint
-    if ( strpos( $uri, '/wp-json/custom/v1/' ) !== false ) {
-        return true;
-    }
-    return $allow;
+add_action( 'smm_toggled', function ( $enabled, $user_id ) {
+	error_log( sprintf( 'Maintenance %s by user %d', $enabled ? 'on' : 'off', $user_id ) );
 }, 10, 2 );
-```
-
-**Allow Specific AJAX Actions**
-```php
-add_filter( 'smm_allow_ajax_action', function( $allow, $action ) {
-    // Allow specific AJAX action
-    if ( $action === 'my_custom_action' ) {
-        return true;
-    }
-    return $allow;
-}, 10, 2 );
-```
-
-**Allow Specific Requests**
-```php
-add_filter( 'smm_allow_request', function( $allow, $uri ) {
-    // Allow specific page
-    if ( strpos( $uri, '/special-page/' ) !== false ) {
-        return true;
-    }
-    return $allow;
-}, 10, 2 );
-```
-
-**Override Template Content**
-```php
-add_filter( 'smm_content_title', function( $default ) {
-    return 'Custom Title from Filter';
-});
-
-add_filter( 'smm_content_description', function( $default ) {
-    return 'Custom description without ACF';
-});
-```
-
-**Change Template Path**
-```php
-add_filter( 'smm_maintenance_template', function( $template ) {
-    return '/custom/path/to/template.php';
-});
 ```
 
 ---
 
-## 📁 File Structure
+## Development
 
-```
-simple-maintenance-mode/
-├── admin/                          # Admin-specific code
-│   ├── class-smm-admin.php         # Admin bar, notices, toggle handler
-│   ├── css/                        # Admin styles
-│   ├── js/                         # Admin scripts
-│   └── sass/                       # Admin Sass source
-├── public/                         # Public-facing code
-│   ├── class-smm-public.php        # Template redirect logic
-│   ├── partials/
-│   │   └── smm-public-display.php  # Default maintenance template
-│   ├── css/                        # Public styles
-│   ├── js/                         # Public scripts
-│   └── sass/                       # Public Sass source
-├── includes/                       # Core plugin classes
-│   ├── class-smm.php               # Main orchestrator
-│   ├── class-smm-loader.php        # Hooks registration
-│   ├── class-smm-common.php        # Shared functionality
-│   ├── class-smm-utils.php         # Helper functions
-│   ├── class-smm-activator.php     # Activation logic
-│   ├── class-smm-deactivator.php   # Deactivation logic
-│   └── class-smm-i18n.php          # Internationalization
-├── assets/                         # Shared assets
-│   ├── css/                        # Common styles
-│   └── sass/                       # Common Sass source
-├── languages/                      # Translation files
-├── smm.php                         # Main plugin file
-├── uninstall.php                   # Cleanup on uninstall
-├── webpack.mix.js                  # Laravel Mix config
-├── tailwind.config.js              # Tailwind CSS config
-└── package.json                    # NPM dependencies
-```
-
----
-
-## ⚙️ Development Setup
-
-The plugin uses Laravel Mix + Tailwind CSS + Sass for asset compilation.
-
-### Requirements
-- Node.js 14+
-- npm or yarn
-
-### Setup
 ```bash
-cd wp-content/plugins/simple-maintenance-mode
-npm install
+composer install
+composer lint:php      # must pass with 0 errors and 0 warnings
+composer lint:php-fix
+npm ci && npm run prod # assets
 ```
 
-### Available Commands
-```bash
-npm run dev           # Development build
-npm run production    # Production build (minified)
-```
+Translations: after changing strings, regenerate `languages/simple-maintenance-mode.pot` with `wp i18n make-pot . languages/simple-maintenance-mode.pot --domain=simple-maintenance-mode --exclude=vendor,node_modules`, update the `.po` files and run `wp i18n make-mo languages` and `wp i18n make-php languages`.
 
-### Source Files
-- Admin Sass: `admin/sass/smm-admin.sass`
-- Public Sass: `public/sass/smm-public.sass`
-- Common Sass: `assets/sass/smm-common.sass`
-
-### Compiled Files
-- Admin CSS: `admin/css/smm-admin.css`
-- Public CSS: `public/css/smm-public.css`
-- Common CSS: `assets/css/smm-common.css`
-
----
-
-## 🔐 Security
-
-The plugin follows WordPress security best practices:
-
-- ✅ Nonce verification for all state changes
-- ✅ Capability checks (`manage_options`)
-- ✅ Input sanitization and output escaping
-- ✅ Direct file access prevention
-- ✅ SQL injection prevention (uses Options API)
-- ✅ XSS prevention (proper escaping)
-
----
-
-## 🌍 Translation Ready
-
-The plugin is fully translatable:
-
-- Text domain: `smm`
-- Translation files: `languages/smm.pot`
-
-To translate:
-1. Use Loco Translate or Poedit
-2. Create translation from `languages/smm.pot`
-3. Save `.po` and `.mo` files to `languages/` folder
-
----
-
-## ❓ FAQ
-
-**Q: Will search engines index my maintenance page?**  
-A: No. The plugin sends HTTP 503 status with `Retry-After` header and `X-Robots-Tag: noindex`, telling search engines the site is temporarily unavailable.
-
-**Q: Can I allow specific users to bypass maintenance mode?**  
-A: Yes! Use the `smm_user_can_bypass` filter. By default, users with `manage_options` or `edit_others_pages` capabilities can bypass.
-
-**Q: What happens to WP Cron jobs?**  
-A: They run normally. The plugin automatically allows `wp-cron.php` requests.
-
-**Q: Can I use this with REST API?**  
-A: Yes! REST API requests work for logged-in users. Use the `smm_allow_rest_request` filter to allow specific endpoints for non-logged-in users.
-
-**Q: Does this work with caching plugins?**  
-A: Yes. The plugin sets proper no-cache headers when maintenance mode is active.
-
-**Q: Can I schedule maintenance mode?**  
-A: Not built-in, but you can use `do_action` with WP Cron to programmatically toggle it:
-```php
-update_option( 'smm_enabled', 1 ); // Enable
-update_option( 'smm_enabled', 0 ); // Disable
-```
-
-**Q: What happens if I deactivate the plugin while maintenance mode is active?**  
-A: The plugin automatically disables maintenance mode when deactivated, preventing your site from being locked.
-
----
-
-## 🐛 Troubleshooting
-
-### Issue: Toggle button doesn't appear
-- **Solution:** Check that you're logged in and have administrator privileges
-
-### Issue: Maintenance page shows but I can't access admin
-- **Solution:** Go directly to `/wp-admin/` or `/wp-login.php` - these are always accessible
-
-### Issue: Styles not showing on maintenance page
-- **Solution:** Ensure your theme properly calls `wp_head()` and `wp_footer()`
-
-### Issue: Shortcodes not working
-- **Solution:** Make sure the template includes `wp_head()` and `wp_footer()` hooks
-
----
-
-## 📝 Changelog
-
-### Version 1.0.0
-- Initial release
-- One-click toggle from Admin Bar
-- Admin notice when active
-- Preview mode support
-- Template override system
-- ACF Pro integration
-- Full shortcode support
-- Developer hooks and filters
-- Laravel Mix + Tailwind CSS setup
-- Security best practices
-- Translation ready
-
----
-
-## 🚧 Roadmap
-
-Future features being considered:
-
-- Countdown timer widget
-- Scheduled maintenance (auto enable/disable)
-- Multiple template presets
-- Role-based bypass settings
-- IP whitelist
-- Maintenance activity log
-- Email notifications
-- Social media links widget
-- Coming soon mode (separate from maintenance)
-
----
-
-## 🤝 Contributing
-
-This plugin is developed and maintained by dig.id for internal use. 
-
-If you find bugs or have feature suggestions:
-- Internal team: Contact via Slack
-- External: Create an issue (if/when open sourced)
-
----
-
-## 📄 License
-
-GPLv2 or later. See [LICENSE.txt](LICENSE.txt) for details.
-
----
-
-## 💡 Credits
-
-Built with ❤️ by [dig.id](https://dig.id)
-
-Based on [WordPress Plugin Boilerplate](https://github.com/DevinVinson/WordPress-Plugin-Boilerplate)
-
----
-
-## 📞 Support
-
-For internal team support: Contact the development team via Slack
-
----
-
-**Made with care for professional WordPress development** ⚡
+Project rules: [CLAUDE.md](CLAUDE.md).
