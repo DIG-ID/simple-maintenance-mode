@@ -1,0 +1,25 @@
+# Force LF line endings on checkout, regardless of each dev's core.autocrlf.
+* text=auto eol=lf
+
+# Binary assets.
+*.png  binary
+*.jpg  binary
+*.webp binary
+
+# Keep development files out of `git archive` and the release zip.
+/.github            export-ignore
+/.vscode            export-ignore
+/.editorconfig      export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/composer.json      export-ignore
+/composer.lock      export-ignore
+/phpcs.xml.dist     export-ignore
+/package.json       export-ignore
+/package-lock.json  export-ignore
+/webpack.mix.js     export-ignore
+/tailwind.config.js export-ignore
+/mix-manifest.json  export-ignore
+/mix.js.map         export-ignore
+/CLAUDE.md          export-ignore
+/TEAMGUIDE.md       export-ignore

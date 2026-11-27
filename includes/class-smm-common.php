@@ -53,15 +53,14 @@ class Smm_Common {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param      string $plugin_name       The name of this plugin.
+	 * @param      string $version    The version of this plugin.
 	 */
 	public function __construct( $core ) {
 
-		$this->core = $core;
+		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
-		$this->version = $core->get_version();
-
+		$this->version     = $core->get_version();
 	}
 
 	/**
@@ -84,7 +83,6 @@ class Smm_Common {
 		 */
 
 		wp_enqueue_style( $this->plugin_name . '-common', SMM_URL . 'assets/css/smm-common.css', array(), $this->version, 'all' );
-
 	}
 
 	/**
@@ -107,7 +105,5 @@ class Smm_Common {
 		 */
 
 		wp_enqueue_script( $this->plugin_name . '-common', SMM_URL . 'assets/js/smm-common.js', array( 'jquery' ), $this->version, false );
-
 	}
-
 }

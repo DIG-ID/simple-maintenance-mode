@@ -48,21 +48,20 @@ class Smm_Admin {
 	 * @var      string    $version    The current version of this plugin.
 	 */
 	private $version;
-	
+
 
 	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param      string $plugin_name       The name of this plugin.
+	 * @param      string $version    The version of this plugin.
 	 */
 	public function __construct( $core ) {
 
-		$this->core = $core;
+		$this->core        = $core;
 		$this->plugin_name = $core->get_plugin_name();
-		$this->version = $core->get_version();
-
+		$this->version     = $core->get_version();
 	}
 
 	/**
@@ -85,7 +84,6 @@ class Smm_Admin {
 		 */
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/smm-admin.css', array(), $this->version, 'all' );
-
 	}
 
 	/**
@@ -108,14 +106,13 @@ class Smm_Admin {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/smm-admin.js', array( 'jquery' ), $this->version, false );
-
 	}
 
 	/**
 	 * Add the toggle button to the admin bar.
 	 *
 	 * @since    1.0.0
-	 * @param    WP_Admin_Bar    $wp_admin_bar    The admin bar object.
+	 * @param    WP_Admin_Bar $wp_admin_bar    The admin bar object.
 	 */
 	public function add_admin_bar_menu( $wp_admin_bar ) {
 
@@ -125,16 +122,16 @@ class Smm_Admin {
 		}
 
 		$enabled = $this->core->is_enabled();
-		$title = $enabled
+		$title   = $enabled
 			? '<span class="ab-icon dashicons dashicons-hammer"></span><span class="ab-label">' . esc_html__( 'Maintenance ON', 'smm' ) . '</span>'
 			: '<span class="ab-icon dashicons dashicons-yes-alt"></span><span class="ab-label">' . esc_html__( 'Maintenance OFF', 'smm' ) . '</span>';
 
 		$wp_admin_bar->add_node(
 			array(
-				'id'     => 'smm-maintenance',
-				'title'  => $title,
-				'href'   => $this->core->get_toggle_url(),
-				'meta'   => array(
+				'id'    => 'smm-maintenance',
+				'title' => $title,
+				'href'  => $this->core->get_toggle_url(),
+				'meta'  => array(
 					'class' => $enabled ? 'smm-on' : 'smm-off',
 					'title' => $enabled ? esc_html__( 'Deactivate maintenance mode', 'smm' ) : esc_html__( 'Activate maintenance mode', 'smm' ),
 				),
@@ -151,7 +148,6 @@ class Smm_Admin {
 				'meta'   => array( 'target' => '_blank' ),
 			)
 		);
-
 	}
 
 	/**
@@ -175,7 +171,6 @@ class Smm_Admin {
 			</p>
 		</div>
 		<?php
-
 	}
 
 	/**
@@ -201,7 +196,5 @@ class Smm_Admin {
 		// Redireciona de volta.
 		wp_safe_redirect( wp_get_referer() ?: admin_url() );
 		exit;
-
 	}
-
 }

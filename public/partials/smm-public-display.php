@@ -20,7 +20,7 @@
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" >
-		<title>Em Manutenção - <?php echo esc_html( get_query_var('smm_vars')['site_name'] ); ?> </title>
+		<title>Em Manutenção - <?php echo esc_html( get_query_var( 'smm_vars' )['site_name'] ); ?> </title>
 		<?php wp_head(); ?>
 	</head>
 	<body <?php body_class( 'smm-maintenance' ); ?>>
@@ -47,7 +47,7 @@
 					<h1 class="font-montserrat font-bold tracking-tight uppercase !text-4xl italic"><?php echo esc_html( smm_get_content( 'title', 'Em Manutenção' ) ); ?></h1>
 					<p class="!text-lg"><?php echo wp_kses_post( smm_get_content( 'description', 'Estaremos de volta brevemente, pedimos desculpa pelo o transtorno causado. Agradecemos a tua compreensão e paciência.' ) ); ?></p>
 				</div>
-				<?php if ( get_query_var('smm_vars')['is_preview'] ) : ?>
+				<?php if ( get_query_var( 'smm_vars' )['is_preview'] ) : ?>
 					<p class="!text-xs font-sourcesanspro bg-slate-800 text-slate-100 p-3 mt-8 inline-block self-start"><em>Pré‑visualização do modo manutenção.</em></p>
 				<?php endif; ?>
 			</div>

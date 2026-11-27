@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ruleset name="Simple Maintenance Mode">
+	<description>PHPCS rules for the Simple Maintenance Mode plugin.</description>
+
+	<file>.</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="cache" value=".phpcs-cache"/>
+	<arg value="sp"/>
+
+	<!-- Anchored to the project root: a bare */public/* pattern would exclude
+	     the whole project when it lives under Local's app/public/ directory. -->
+	<exclude-pattern>./vendor/*</exclude-pattern>
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./dist/*</exclude-pattern>
+
+	<!-- Keep in sync with "Requires at least" / "Requires PHP" in the plugin header
+	     and README.txt. The plugin runs on older client sites, hence PHP 7.4. -->
+	<config name="minimum_wp_version" value="5.8"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<rule ref="WordPress-Core"/>
+	<rule ref="WordPress-Docs"/>
+	<rule ref="WordPress-Extra"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="smm"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="smm_"/>
+				<element value="Smm_"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

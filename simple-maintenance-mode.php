@@ -107,6 +107,5 @@ function run_smm() {
 
 	$plugin = new Smm();
 	$plugin->run();
-
 }
 run_smm();

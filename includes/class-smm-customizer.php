@@ -485,11 +485,10 @@ class Smm_Customizer {
 	public function enqueue_preview_scripts() {
 		wp_enqueue_script(
 			'smm-customizer-preview',
-			plugin_dir_url( dirname( __FILE__ ) ) . 'admin/js/smm-customizer-preview.js',
+			plugin_dir_url( __DIR__ ) . 'admin/js/smm-customizer-preview.js',
 			array( 'customize-preview', 'jquery' ),
 			'1.0.0',
 			true
 		);
 	}
-
 }
