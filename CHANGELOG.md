@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/) (`MAJOR.M
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-11-27
+
 ### Added
 - Development tooling: Composer with PHPCS (WordPress Coding Standards 3, PHPCompatibilityWP for PHP 7.4+, WordPress stubs) and the `lint:php` / `lint:php-fix` scripts.
 - `phpcs.xml.dist`, `.editorconfig`, `.gitattributes` (LF line endings, development files kept out of release archives) and shared VS Code settings.

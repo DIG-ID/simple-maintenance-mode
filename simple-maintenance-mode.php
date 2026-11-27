@@ -10,7 +10,7 @@
  * Plugin Name:       Simple Maintenance Mode
  * Plugin URI:        https://github.com/DIG-ID/simple-maintenance-mode
  * Description:       Toggle a maintenance page (HTTP 503) for visitors with one click, while logged-in editors keep seeing the site.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            dig.id
@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since 1.0.0
  */
-define( 'SMM_VERSION', '1.0.0' );
+define( 'SMM_VERSION', '1.1.0' );
 
 /**
  * Absolute path to the main plugin file.
