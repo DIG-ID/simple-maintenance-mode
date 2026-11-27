@@ -79,6 +79,9 @@ class Smm_Plugin {
 		$this->define_public_hooks();
 		$this->define_common_hooks();
 		$this->init_customizer();
+
+		$updater = new Smm_Updater();
+		$updater->register();
 	}
 
 	/**
@@ -94,6 +97,7 @@ class Smm_Plugin {
 		require_once SMM_DIR . 'includes/class-smm-utils.php';
 		require_once SMM_DIR . 'includes/class-smm-common.php';
 		require_once SMM_DIR . 'includes/class-smm-customizer.php';
+		require_once SMM_DIR . 'includes/class-smm-updater.php';
 		require_once SMM_DIR . 'admin/class-smm-admin.php';
 		require_once SMM_DIR . 'public/class-smm-public.php';
 

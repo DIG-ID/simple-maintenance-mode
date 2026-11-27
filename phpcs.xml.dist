@@ -26,6 +26,15 @@
 	<rule ref="WordPress-Extra"/>
 	<rule ref="PHPCompatibilityWP"/>
 
+	<!-- bin/ holds CLI scripts that run outside WordPress: plain file functions
+	     and STDERR output are correct there. -->
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>./bin/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>./bin/*</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
