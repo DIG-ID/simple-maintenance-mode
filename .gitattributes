@@ -17,9 +17,9 @@
 /phpcs.xml.dist     export-ignore
 /package.json       export-ignore
 /package-lock.json  export-ignore
-/webpack.mix.js     export-ignore
+/vite.config.mjs    export-ignore
 /tailwind.config.js export-ignore
-/mix-manifest.json  export-ignore
-/mix.js.map         export-ignore
+/public/sass        export-ignore
+/assets/sass        export-ignore
 /CLAUDE.md          export-ignore
 /TEAMGUIDE.md       export-ignore

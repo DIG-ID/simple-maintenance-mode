@@ -47,10 +47,13 @@ Os nomes internos (classes `Smm_*`, funções privadas) podem ser melhorados; os
 ```bash
 composer lint:php         # PHPCS — tem de dar 0 erros e 0 warnings antes de um PR
 composer lint:php-fix     # PHPCBF
-npm ci && npm run prod    # assets de produção
+npm run dev               # servidor do Vite com HMR (não escreve a build)
+npm run prod              # build de produção para dist/
 ```
 
-Testar no `control-client.digid` (Local), que tem o stack completo dos sites live.
+- **Assets:** Vite 8 + Tailwind 3 (`vite.config.mjs`); o PHP enfileira pelo caminho fonte com `smm_vite_enqueue_style()` (`includes/smm-vite.php`), nunca `dist/` à mão. `dist/` não entra no git — é a release que o compila. Nenhum asset do SMM no front-end para visitantes quando a manutenção está desligada.
+- **Onde desenvolver:** no site `testing.digid` (Local). O `control-client.digid` é partilhado com o desenvolvimento do Control Center: só para os testes finais de integração (WPML, Yoast, agente), combinados com o Pedro, sem mexer em sessões nem utilizadores existentes.
+- **WP-CLI no `testing`:** o site liga-se ao MySQL por socket; fora do shell do Local, passar a porta TCP com um `--require` que defina `DB_HOST` (porta em `%APPDATA%\Local\sites.json`).
 
 ---
 

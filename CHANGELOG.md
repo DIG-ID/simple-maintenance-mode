@@ -35,9 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/) (`MAJOR.M
 - The REST API (`/wp-json/…` and `?rest_route=…`) is never blocked, for any visitor; the Control Center agent needs it during maintenance.
 - Translations load on `init` (WordPress 6.7+ warns about earlier loading).
 - Internal classes renamed: `Smm` → `Smm_Plugin`, `Smm_i18n` → `Smm_I18n`; `activate_smm()`, `deactivate_smm()` and `run_smm()` → `smm_activate()`, `smm_deactivate()` and `smm_run()`.
+- Build tooling migrated from Laravel Mix to Vite 8 (Tailwind 3 via PostCSS): hashed files in `dist/` resolved through the Vite manifest, and a dev server with HMR (`npm run dev`). `dist/` is built by the release workflow and no longer committed. The maintenance page looks the same (pixel-identical screenshots).
+- **The plugin no longer loads any file for visitors when maintenance is off.** The maintenance page CSS (including Tailwind's base reset) used to load on every front-end page of the site; it now loads only on the maintenance page and its preview, and the admin bar button CSS only where the button is shown. Sites whose theme does not include its own CSS reset (old themes without Tailwind) may show small spacing differences on headings, lists and paragraphs — check one or two such sites after updating.
 
 ### Removed
 - `smm_allow_rest_request` filter: REST requests are always allowed now.
+- Empty boilerplate assets that loaded on every page: `public/js/smm-public.js`, `assets/js/smm-common.js`, `admin/js/smm-admin.js` and `admin/css/smm-admin.css`; the unused `assets/css/plugin-main.css`; Laravel Mix files (`webpack.mix.js`, `mix-manifest.json`, `mix.js.map`) and the compiled CSS in the repository.
 - Activation checks for the WordPress and PHP versions (WordPress enforces the plugin headers); they also deactivated the wrong file.
 
 ### Fixed

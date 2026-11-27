@@ -88,6 +88,7 @@ class Smm_Plugin {
 	 * @return void
 	 */
 	private function load_dependencies() {
+		require_once SMM_DIR . 'includes/smm-vite.php';
 		require_once SMM_DIR . 'includes/class-smm-loader.php';
 		require_once SMM_DIR . 'includes/class-smm-i18n.php';
 		require_once SMM_DIR . 'includes/class-smm-utils.php';
@@ -121,8 +122,6 @@ class Smm_Plugin {
 	private function define_admin_hooks() {
 		$plugin_admin = new Smm_Admin( $this );
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_bar_menu', $plugin_admin, 'add_admin_bar_menu', 100 );
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'admin_notice' );
 		$this->loader->add_action( 'admin_post_smm_toggle', $plugin_admin, 'handle_toggle' );
@@ -141,7 +140,6 @@ class Smm_Plugin {
 		$plugin_public = new Smm_Public( $this );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'parse_request', $plugin_public, 'block_crawler_files', 0 );
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'template_redirect', 0 );
 	}
@@ -156,9 +154,7 @@ class Smm_Plugin {
 		$plugin_common = new Smm_Common( $this );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_common, 'enqueue_scripts' );
 	}
 
 	/**
